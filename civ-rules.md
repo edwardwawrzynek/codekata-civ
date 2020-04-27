@@ -69,7 +69,7 @@ If there are multiple armies defending, they are considered part of the same def
 
 Each combat unit deals damage to each army in the opposing unit equal to:
 $$
-\frac{myOffensiveStrength}{theirOffensiveStrength} * myNumArmies * \frac{1}{theirNumArmies} * 100
+\frac{myOffensiveStrength}{theirDefensiveStrength} * myNumArmies * \frac{1}{theirNumArmies} * 100
 $$
 
 Any army with 0 or less hitpoint dies at the end of combat.
