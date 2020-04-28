@@ -1,8 +1,11 @@
 package com.frc2036.comp.game
 
 import kotlin.random.Random
+import kotlin.math.abs
 
-// A game map (just its tile layout)
+/**
+ * Types of tiles
+ */
 enum class TileType (val apiIndex: Int) {
   Ocean(0),
   Grassland(1),
@@ -12,6 +15,18 @@ enum class TileType (val apiIndex: Int) {
   Fogged(-1)
 }
 
+/*
+ * Types of harvested materials
+ */
+enum class ResourceType {
+  Production,
+  Trade,
+  Food
+}
+
+/**
+ * A map (just a tile configuration)
+ */
 data class GameMap(val size: Int, val contents: Array<Array<TileType>>) {
   companion object {
     fun generateRandom(size: Int): GameMap {
@@ -43,4 +58,120 @@ data class GameMap(val size: Int, val contents: Array<Array<TileType>>) {
       return GameMap(size, contents)
     }
   }
+
+  fun observeFogMap(): Array<Array<Boolean>> = Array(size) { Array(size) { true } }
+}
+
+/**
+ * Something owned by a player that has a place on the board (city, worker, army)
+ */
+open class BoardObject(var position: Pair<Int, Int>) {
+  // calculate the manhattan distance to another object on the board
+  fun distanceTo(other: BoardObject): Int {
+    return abs(position.first - other.position.first) + abs(position.second - other.position.second)
+  }
+  fun distanceTo(other: Pair<Int, Int>): Int {
+    return abs(position.first - other.first) + abs(position.second - other.second)
+  }
+}
+
+// a city instance
+class City(position: Pair<Int, Int>): BoardObject(position)
+
+// A movable BoardObject (worker or army)
+abstract class BoardUnit(position: Pair<Int, Int>): BoardObject(position) {
+  // if the unit has been moved this turn
+  var moved = false
+  // if a position is a valid move for this unit
+  fun isValidMove(newPos: Pair<Int, Int>): Boolean {
+    return distanceTo(newPos) <= 1
+  }
+  // make a move
+  fun doMove(newPos: Pair<Int, Int>) {
+    if (!isValidMove(newPos)) return
+    moved = true
+    position = position.copy(first = newPos.first, second = newPos.second)
+  }
+  // damage operations
+  abstract fun takeDamage(damage: Int)
+  abstract fun isDead(): Boolean
+}
+
+// an army unit
+class Army(position: Pair<Int, Int>): BoardUnit(position) {
+  var hitpoints = ARMY_INIT_HITPOINTS
+  override fun takeDamage(damage: Int) {
+    hitpoints -= damage
+  }
+  override fun isDead() = hitpoints <= 0
+}
+
+// a worker unit
+class Worker(position: Pair<Int, Int>): BoardUnit(position) {
+  private var killed = false
+  override fun takeDamage(damage: Int) {
+    killed = true
+  }
+  override fun isDead() = killed
+}
+
+/**
+ * A player and is associated state
+ **/
+class Player() {
+  var offensiveStrength = 1.0
+  var defensiveStrength = 1.0
+
+  val cities = mutableListOf<City>()
+  val workers = mutableListOf<Worker>()
+  val armies = mutableListOf<Army>()
+
+  val resources = mapOf(ResourceType.Food to 0, ResourceType.Production to 0, ResourceType.Trade to 0)
+
+  // find all units nearby city
+  fun findUnitsNearCity(city: City): List<BoardUnit> {
+    val res = mutableListOf<BoardUnit>()
+    for(a in armies) {
+      if(city.distanceTo(a) <= WORKER_DISTANCE_TO_CITY) res.add(a)
+    }
+    for(w in workers) {
+      if(city.distanceTo(w) <= WORKER_DISTANCE_TO_CITY) res.add(w)
+    }
+
+    return res
+  }
+
+  // calculate the fogged map of the player at this point
+  // returns an array or array of booleans (same as game map, indexed [x][y]) or whether the cell is unfogged or not
+  fun calculateUnfoggedMap(map: GameMap): Array<Array<Boolean>> {
+    val res = Array(map.size) { Array(map.size) { false } }
+    for(x in 0 until map.size) {
+      for(y in 0 until map.size) {
+        if(res[x][y]) continue
+        for(u in cities) {
+          if(u.distanceTo(Pair(x,y)) <= WORKER_DISTANCE_TO_CITY) {
+            res[x][y] = true
+            break
+          }
+        }
+        if(res[x][y]) continue
+        for(u in armies) {
+          if(u.distanceTo(Pair(x,y)) <= WORKER_DISTANCE_TO_CITY) {
+            res[x][y] = true
+            break
+          }
+        }
+        if(res[x][y]) continue
+        for(u in workers) {
+          if(u.distanceTo(Pair(x,y)) <= WORKER_DISTANCE_TO_CITY) {
+            res[x][y] = true
+            break
+          }
+        }
+      }
+    }
+
+    return res
+  }
+
 }

@@ -77,8 +77,8 @@ Response is of the form:
 ```json
 {"error": null,
  "armies": [
-   [{"x": Int, "y": Int}, ...],  // player 0
-   [{"x": Int, "y": Int}, ...],  // player 1
+   [{"x": Int, "y": Int, "hitpoints":  Int}, ...],  // player 0
+   [{"x": Int, "y": Int, "hitpoints":  Int}, ...],  // player 1
    [...],  // player 2
    [...]   // player 3
  ]

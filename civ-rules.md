@@ -54,7 +54,7 @@ Defensive research (20 trade) -- increases defensive combat strength by 0.3;
 Offensive research (20 trade) -- increases offensive combat strength by 0.3;
 
 ### Movement
-A player may choose to move all workers and armies north, south, east, or west, or not at all.
+A player may choose to move all workers and armies north, south, east, or west or not at all.
 
 If a army or worker is moved onto a tile with an opponent army, or worker, combat begins.
 
