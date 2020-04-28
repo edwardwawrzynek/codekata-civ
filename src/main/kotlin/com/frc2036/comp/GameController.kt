@@ -13,18 +13,42 @@ import kotlin.random.Random
 @RequestMapping(value=["/api"])
 class GameController {
 
-    private val game: Game? = Game(GameMap.generateRandom(32), KeyManager(listOf("secret0"), listOf("observe0")))
+    private val game = Game(GameMap.generateRandom(32), KeyManager(listOf("secret0", "secret1", "secret2", "secret3"), listOf("observe0"), listOf("admin0")), true)
 
-    private fun makeErrorResponse(msg: String): String = "{\"error\": $msg }"
+    private fun makeErrorResponse(msg: String): String = "{\"error\": \"$msg\" }"
 
     /* get the current map. If a player, fogged tiles may be present */
     @RequestMapping(value=["/board"], method=[RequestMethod.GET], produces=["application/json"])
     @Synchronized
     fun getBoard(@RequestParam key: String): String {
-        if(game == null) return makeErrorResponse("no active game")
+        if(!game.started) return makeErrorResponse("no active game")
         if(!game.keys.isValidKey(key)) return makeErrorResponse("invalid key")
-        // TODO: fog of war if using a player key
-        return "{\"error\": null, \"size\": ${game.map.size}, \"board\": ${game.map.contents.map { column -> column.map { it.apiIndex } }}}"
+        // apply fog of war
+        val fogMap = if(game.keys.isPlayer(key)) game.keysToPlayers[key]!!.calculateUnfoggedMap(game.map) else game.map.observeFogMap()
+        return "{\"error\": null, \"size\": ${game.map.size}, \"board\": ${game.map.contents.mapIndexed { 
+            x, column -> column.mapIndexed { 
+                y, item -> if(fogMap[x][y]) item.apiIndex else TileType.Fogged.apiIndex 
+            } 
+        }}}"
+    }
+
+    /* get the current cities. If player, fogged results will not be included */
+    @RequestMapping(value=["/cities"], method=[RequestMethod.GET], produces=["application/json"])
+    @Synchronized
+    fun getCities(@RequestParam key: String): String {
+        if(!game.started) return makeErrorResponse("no active game")
+        if(!game.keys.isValidKey(key)) return makeErrorResponse("invalid key")
+
+        // apply fog of war
+        val fogMap = if(game.keys.isPlayer(key)) game.keysToPlayers[key]!!.calculateUnfoggedMap(game.map) else game.map.observeFogMap()
+        // calculate visible cities
+        val cities = game.players.map { player ->
+            player.cities.filter { city -> fogMap[city.position.first][city.position.second] }.map {
+                city -> "{\"x\": ${city.position.first}, \"y\": ${city.position.second}}"
+            }
+        }
+
+        return "{\"error\": null, \"cities\": $cities}"
     }
 
 }

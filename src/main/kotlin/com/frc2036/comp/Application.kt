@@ -9,7 +9,5 @@ import com.frc2036.comp.game.*
 open class Application
 
 fun main(args: Array<String>) {
-    val m = GameMap.generateRandom(32)
-    println(m)
     runApplication<Application>(*args)
 }
