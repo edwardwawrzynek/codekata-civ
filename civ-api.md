@@ -26,8 +26,8 @@ Each player is given an index -- they are either player 0, 1, 2, or 3
 * `0` - Ocean
 * `1` - Grassland
 * `2` - Hills
-* `3` - Mountains
-* `4` - Forest
+* `3` - Forest
+* `4` - Mountains
 * `-1` - Type hidden by fog of war
 
 `ProduceType` - An integer, corresponding to the type of thing to produce. Options are:
