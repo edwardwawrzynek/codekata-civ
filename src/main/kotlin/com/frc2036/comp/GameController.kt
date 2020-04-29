@@ -110,4 +110,60 @@ class GameController {
         return "{\"error\": null, \"player\": $player}"
     }
 
+    /* get the names and offensive and defensive strengths of each player */
+    @RequestMapping(value=["/players"], method=[RequestMethod.GET], produces=["application/json"])
+    @Synchronized
+    fun getPlayers(@RequestParam key: String): String {
+        if(!game.started) return makeErrorResponse("no active game")
+        if(!game.keys.isValidKey(key)) return makeErrorResponse("invalid key")
+
+        return "{\"error\": null, \"players\": ${game.players.mapIndexed { i, player -> "{\"name\": \"${game.playerNames[i]}\", \"offense\": ${player.offensiveStrength}, \"defense\": ${player.defensiveStrength}}"}}}"
+    }
+
+    /* get the number of resources (trade, production, food) each player has */
+    @RequestMapping(value=["/resources"], method=[RequestMethod.GET], produces=["application/json"])
+    @Synchronized
+    fun getResources(@RequestParam key: String): String {
+        if(!game.started) return makeErrorResponse("no active game")
+        if(!game.keys.isValidKey(key)) return makeErrorResponse("invalid key")
+
+        return "{\"error\": null, \"resources\": ${game.players.map { player -> "{\"production\": ${player.resources[ResourceType.Production]}, \"food\": ${player.resources[ResourceType.Food]}, \"trade\": ${player.resources[ResourceType.Trade]}}"}}}"
+    }
+
+    /* set the name of a player */
+    @RequestMapping(value=["/set_name"], method=[RequestMethod.POST], produces=["application/json"])
+    @Synchronized
+    fun setName(@RequestParam key: String, @RequestParam name: String): String {
+        if(!game.keys.isValidKey(key)) return makeErrorResponse("invalid key")
+        if(!game.keys.isPlayer(key)) return makeErrorResponse("key is not a player key")
+        val player = game.players.indexOf(game.keysToPlayers[key])
+
+        game.playerNames[player] = name
+
+        return "{\"error\": null}"
+    }
+
+    /* get the current player to go */
+    @RequestMapping(value=["/current_player"], method=[RequestMethod.GET], produces=["application/json"])
+    @Synchronized
+    fun getCurrentPlayer(@RequestParam key: String): String {
+        if(!game.started) return makeErrorResponse("no active game")
+        if(!game.keys.isValidKey(key)) return makeErrorResponse("invalid key")
+
+        return "{\"error\": null, \"turn\": ${game.currentPlayerIndex}}"
+    }
+
+    /* end current turn */
+    @RequestMapping(value=["/end_trun"], method=[RequestMethod.POST], produces=["application/json"])
+    @Synchronized
+    fun endTurn(@RequestParam key: String): String {
+        if(!game.started) return makeErrorResponse("no active game")
+        if(!game.keys.isPlayer(key)) return makeErrorResponse("not a player key")
+
+        // make sure key is current player
+        if(game.players.indexOf(game.keysToPlayers[key]) != game.currentPlayerIndex) return makeErrorResponse("not current player")
+        game.nextTurn()
+
+        return "{\"error\": null}"
+    }
 }

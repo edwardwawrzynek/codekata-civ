@@ -30,6 +30,11 @@ Each player is given an index -- they are either player 0, 1, 2, or 3
 * `4` - Mountains
 * `-1` - Type hidden by fog of war
 
+`ResourceType`
+* `0` - Army
+* `1` - Worker
+* `2` - City
+
 ## Routes
 ### Game State Routes
 #### `GET /api/board - params(key: String)`
@@ -111,22 +116,22 @@ Response is of the form:
  ]}
 ```
 
-#### `GET /api/resources - params(key: String)`
+#### `GET /api/players - params(key: String)`
 
-Get the current number of resources (production, food, trade) held by each player.
+Get the names of players and their offensive and defensive strengths.
 
 Response is of the form:
 ```
 {"error": null,
- "resources": [
-   {"production": Int, "food": Int, "trade": Int},  // player 0
-   {"production": Int, "food": Int, "trade": Int},  // player 1
-   {"production": Int, "food": Int, "trade": Int},  // player 2
-   {"production": Int, "food": Int, "trade": Int}   // player 3
+ "players": [
+   {"name": String, "offense": Int, "defense": Int},  // player 0
+   {"name": String, "offense": Int, "defense": Int},  // player 1
+   {"name": String, "offense": Int, "defense": Int},  // player 2
+   {"name": String, "offense": Int, "defense": Int}   // player 3
  ]}
 ```
 
-#### `GET /api/current_turn - params(key: String)`
+#### `GET /api/current_player - params(key: String)`
 
 Get which player's turn it is to go.
 
@@ -148,11 +153,14 @@ Response is of the form
 Note: all of these require a player's key, and can only be called while it is your turn.
 
 The sequence of taking a turn:
-1. Wait until `/api/current_turn` indicates it is your turn
+1. Wait until `/api/current_player` indicates it is your turn
 2. Make any number of `/api/produce`, `/api/move_worker`, and `/api/move_army` calls..
 3. Call `/api/end_turn` to end your turn. You must call this.
 
-#### `POST /api/produce - params(key: String, type: ProductionType, x: Int, y: Int)`
+#### `POST /api/set_name - params(key: String, name: String)`
+Set your AI's name displayed on the graphical frontend. Not required, but highly recommenced.
+
+#### `POST /api/produce - params(key: String, type: ResourceType, x: Int, y: Int)`
 
 Produce the given thing (army, worker, or city) at the given location.
 
