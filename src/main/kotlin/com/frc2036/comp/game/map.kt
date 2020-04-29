@@ -1,7 +1,7 @@
 package com.frc2036.comp.game
 
 import kotlin.math.abs
-import org.spongepowered.noise.module.source.Perlin
+import fastnoise.FastNoise
 import kotlin.random.Random
 
 /**
@@ -36,21 +36,22 @@ data class GameMap(val size: Int, val contents: Array<Array<TileType>>) {
       val contents = Array(size){ Array(size){ TileType.Fogged } }
       // all the intersections between player squares must be the same, so each square is a mirror of a triangle
       // generate triangle
+      val noise = FastNoise()
+      noise.SetSeed(Random.nextInt())
+      noise.SetNoiseType(FastNoise.NoiseType.Perlin)
       val squareSize = size/2
       for(y in 0 until squareSize) {
         for(x in 0..y) {
-          val tile = listOf(TileType.Ocean, TileType.Grassland, TileType.Hills, TileType.Forest, TileType.Mountains).random()
-//          val perlin = Perlin()
-//          perlin.setSeed(Random.nextInt())
-//          val res = (perlin.getValue(x.toDouble()/64.0, y.toDouble()/64.0, 120.0)-0.92)*5.0
-//          val tile = when {
-//            res < 0.2 -> TileType.Ocean
-//            res >= 0.2 && res < 0.4 -> TileType.Grassland
-//            res >= 0.4 && res < 0.6 -> TileType.Hills
-//            res >= 0.6 && res < 0.8 -> TileType.Forest
-//            res >= 0.8 -> TileType.Mountains
-//            else -> TileType.Ocean
-//          }
+          //val tile = listOf(TileType.Ocean, TileType.Grassland, TileType.Hills, TileType.Forest, TileType.Mountains).random()
+          val res = noise.GetNoise((x.toFloat()*16.0).toFloat(), (y.toFloat()*16.0).toFloat())+0.5
+          val tile = when {
+            res < 0.2 -> TileType.Ocean
+            res >= 0.2 && res < 0.4 -> TileType.Grassland
+            res >= 0.4 && res < 0.6 -> TileType.Hills
+            res >= 0.6 && res < 0.8 -> TileType.Forest
+            res >= 0.8 -> TileType.Mountains
+            else -> TileType.Ocean
+          }
           contents[x][y] = tile
           // mirror triangle
           contents[y][x] = contents[x][y]
