@@ -30,11 +30,6 @@ Each player is given an index -- they are either player 0, 1, 2, or 3
 * `4` - Mountains
 * `-1` - Type hidden by fog of war
 
-`ProduceType` - An integer, corresponding to the type of thing to produce. Options are:
-* `0` - Army
-* `1` - Worker
-* `2` - City
-
 ## Routes
 ### Game State Routes
 #### `GET /api/board - params(key: String)`
@@ -42,7 +37,7 @@ Each player is given an index -- they are either player 0, 1, 2, or 3
 Get the current board state. If using a player key, some tiles may be obscured by the fog of war. If using an observer key, no tiles will be obscured.
 
 Response is of the form:
-```json
+```
 {"error": null,
  "size": Int, // length of one side of the sqquare board
  "board": [
@@ -58,7 +53,7 @@ Response is of the form:
 Get a list of cities present on the board. If using a player key, cities obscured by the fog of war are not included.
 
 Response is of the form:
-```json
+```
 {"error": null,
  "cities": [
    [{"x": Int, "y": Int}, ...],  // player 0
@@ -74,7 +69,7 @@ Response is of the form:
 Get a list of armies present on the board. If using a player key, armies obscured by the fog of war are not included.
 
 Response is of the form:
-```json
+```
 {"error": null,
  "armies": [
    [{"x": Int, "y": Int, "hitpoints":  Int}, ...],  // player 0
@@ -90,7 +85,7 @@ Response is of the form:
 Get a list of workers present on the board. If using a player key, workers obscured by the fog of war are not included.
 
 Response is of the form:
-```json
+```
 {"error": null,
  "workers": [
    [{"x": Int, "y": Int}, ...],  // player 0
@@ -106,7 +101,7 @@ Response is of the form:
 Get the current number of resources (production, food, trade) held by each player.
 
 Response is of the form:
-```json
+```
 {"error": null,
  "resources": [
    {"production": Int, "food": Int, "trade": Int},  // player 0
@@ -121,7 +116,7 @@ Response is of the form:
 Get the current number of resources (production, food, trade) held by each player.
 
 Response is of the form:
-```json
+```
 {"error": null,
  "resources": [
    {"production": Int, "food": Int, "trade": Int},  // player 0
@@ -136,8 +131,17 @@ Response is of the form:
 Get which player's turn it is to go.
 
 Response is of the form:
-```json
+```
 {"error": null, "turn": Int /* 0 for player 0, 1 for player 1, etc. -1 if game hasn't started */}
+```
+
+#### `GET /api/player_index - params(key: String)`
+
+Get which player you are (player 0, player 1, player 2, player 3).
+
+Response is of the form
+```
+{"error": null, "player": Int}
 ```
 
 ### Game movement routes
@@ -157,11 +161,11 @@ If producing a army or worker, the tile referred to by `x` and `y` must be a cit
 If producing a city, the tile referred to by `x` any `y` must be not obscured by the fog of war.
 
 If you don't have enough production units, an error will be returned:
-```json
+```
 {"error": "not enough production/invalid location"}
 ```
 Otherwise:
-```json
+```
 {"error":null}
 ```
 
