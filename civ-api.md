@@ -30,7 +30,7 @@ Each player is given an index -- they are either player 0, 1, 2, or 3
 * `4` - Mountains
 * `-1` - Type hidden by fog of war
 
-`ResourceType`
+`ProduceType`
 * `0` - Army
 * `1` - Worker
 * `2` - City
@@ -160,7 +160,7 @@ The sequence of taking a turn:
 #### `POST /api/set_name - params(key: String, name: String)`
 Set your AI's name displayed on the graphical frontend. Not required, but highly recommenced.
 
-#### `POST /api/produce - params(key: String, type: ResourceType, x: Int, y: Int)`
+#### `POST /api/produce - params(key: String, type: ProduceType, x: Int, y: Int)`
 
 Produce the given thing (army, worker, or city) at the given location.
 

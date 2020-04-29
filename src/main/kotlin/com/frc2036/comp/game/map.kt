@@ -1,6 +1,8 @@
 package com.frc2036.comp.game
 
 import kotlin.math.abs
+import org.spongepowered.noise.module.source.Perlin
+import kotlin.random.Random
 
 /**
  * Types of tiles
@@ -37,7 +39,19 @@ data class GameMap(val size: Int, val contents: Array<Array<TileType>>) {
       val squareSize = size/2
       for(y in 0 until squareSize) {
         for(x in 0..y) {
-          contents[x][y] = listOf(TileType.Ocean, TileType.Grassland, TileType.Hills, TileType.Forest, TileType.Mountains).random()
+          val tile = listOf(TileType.Ocean, TileType.Grassland, TileType.Hills, TileType.Forest, TileType.Mountains).random()
+//          val perlin = Perlin()
+//          perlin.setSeed(Random.nextInt())
+//          val res = (perlin.getValue(x.toDouble()/64.0, y.toDouble()/64.0, 120.0)-0.92)*5.0
+//          val tile = when {
+//            res < 0.2 -> TileType.Ocean
+//            res >= 0.2 && res < 0.4 -> TileType.Grassland
+//            res >= 0.4 && res < 0.6 -> TileType.Hills
+//            res >= 0.6 && res < 0.8 -> TileType.Forest
+//            res >= 0.8 -> TileType.Mountains
+//            else -> TileType.Ocean
+//          }
+          contents[x][y] = tile
           // mirror triangle
           contents[y][x] = contents[x][y]
         }
@@ -59,6 +73,20 @@ data class GameMap(val size: Int, val contents: Array<Array<TileType>>) {
   }
 
   fun observeFogMap(): Array<Array<Boolean>> = Array(size) { Array(size) { true } }
+
+  fun getHarvestAmounts(position: Pair<Int, Int>): Map<ResourceType, Int> {
+    val type = contents[position.first][position.second]
+
+    /* harvest table */
+    return when(type) {
+      TileType.Ocean -> mapOf(ResourceType.Food to 1, ResourceType.Production to 0, ResourceType.Trade to 2)
+      TileType.Grassland -> mapOf(ResourceType.Food to 2, ResourceType.Production to 1, ResourceType.Trade to 0)
+      TileType.Hills -> mapOf(ResourceType.Food to 1, ResourceType.Production to 2, ResourceType.Trade to 1)
+      TileType.Forest -> mapOf(ResourceType.Food to 1, ResourceType.Production to 3, ResourceType.Trade to 0)
+      TileType.Mountains -> mapOf(ResourceType.Food to 0, ResourceType.Production to 1, ResourceType.Trade to 0)
+      else -> throw AssertionError("map should not contain fogged tiles")
+    }
+  }
 }
 
 /**
@@ -125,7 +153,7 @@ class Player() {
   val workers = mutableListOf<Worker>()
   val armies = mutableListOf<Army>()
 
-  val resources = mapOf(ResourceType.Food to 0, ResourceType.Production to 0, ResourceType.Trade to 0)
+  val resources = mutableMapOf(ResourceType.Food to 0, ResourceType.Production to 0, ResourceType.Trade to 0)
 
   // find all units nearby city
   fun findUnitsNearCity(city: City): List<BoardUnit> {
@@ -171,6 +199,53 @@ class Player() {
     }
 
     return res
+  }
+
+  /* add single harvest to total resources */
+  fun addHarvest(harvest: Map<ResourceType, Int>) {
+    resources[ResourceType.Food] = resources[ResourceType.Food]!! + harvest[ResourceType.Food]!!
+    resources[ResourceType.Production] = resources[ResourceType.Production]!! + harvest[ResourceType.Production]!!
+    resources[ResourceType.Trade] = resources[ResourceType.Trade]!! + harvest[ResourceType.Trade]!!
+  }
+
+  /* do a harvest of all workers and cities */
+  fun doHarvest(map: GameMap) {
+    val harvested = Array(map.size) { Array(map.size) { false } }
+    val hasCity = Array(map.size) { Array(map.size) { false } }
+
+    for(c in cities) {
+      if(!harvested[c.position.first][c.position.second]) addHarvest(map.getHarvestAmounts(c.position))
+      harvested[c.position.first][c.position.second] = true
+      hasCity[c.position.first][c.position.second] = true
+    }
+
+    for(w in workers) {
+      if(!harvested[w.position.first][w.position.second]) addHarvest(map.getHarvestAmounts(w.position))
+      harvested[w.position.first][w.position.second] = true
+      if(hasCity[w.position.first][w.position.second]) resources[ResourceType.Trade] = resources[ResourceType.Trade]!! + 2
+    }
+  }
+
+  /* make units eat and potentially starve */
+  fun doEat() {
+    // feed workers, then armies
+    val workersRandomized = workers.shuffled()
+    for(w in workersRandomized) {
+      resources[ResourceType.Food] = resources[ResourceType.Food]!! - WORKER_FOOD
+      if(resources[ResourceType.Food]!! < 0) {
+        //TODO: display some notification that worker died
+        workers.remove(w)
+      }
+    }
+    val armiesRandomized = armies.shuffled()
+    for(a in armiesRandomized) {
+      resources[ResourceType.Food] = resources[ResourceType.Food]!! - ARMY_FOOD
+      if(resources[ResourceType.Food]!! < 0) {
+        //TODO: display some notification that army died
+        armies.remove(a)
+      }
+    }
+    if(resources[ResourceType.Food]!! < 0) resources[ResourceType.Food] = 0
   }
 
 }

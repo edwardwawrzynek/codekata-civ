@@ -3,11 +3,21 @@ package com.frc2036.comp.game
 import java.lang.AssertionError
 
 // how many hitpoints an army starts with
-val ARMY_INIT_HITPOINTS = 100
+const val ARMY_INIT_HITPOINTS = 100
 // what is considered nearby a city (effectively for ownership of workers)
-val CITY_NEARBY_DISTANCE = 2
+const val CITY_NEARBY_DISTANCE = 2
 // distance from unit or city for fogging
-val FOG_DISTANCE = 2
+const val FOG_DISTANCE = 3
+
+// food each worker eats
+const val WORKER_FOOD = 2
+// food each army eats
+const val ARMY_FOOD = 2
+
+// production cost of army, worker, city
+const val WORKER_COST = 10
+const val ARMY_COST = 10
+const val CITY_COST = 30
 
 /**
  * player keys correspond to a player in the game. They give access to game manipulation routes, but limit some observation routes with the fog of war
@@ -21,11 +31,12 @@ class KeyManager(val playerKeys: List<String>, val observeKeys: List<String>, va
     fun isAdmin(key: String) = key in adminKeys
 }
 
-class Game (val map: GameMap, val keys: KeyManager, var started: Boolean) {
+class Game (val map: GameMap, val keys: KeyManager) {
     val players = mutableListOf<Player>()
     val keysToPlayers = mutableMapOf<String, Player>()
     val playerNames = mutableListOf<String>()
 
+    var started = false
     var currentPlayerIndex = 0
 
     init {
@@ -50,5 +61,21 @@ class Game (val map: GameMap, val keys: KeyManager, var started: Boolean) {
     fun nextTurn() {
         currentPlayerIndex++
         currentPlayerIndex %= 4
+        // if player has no cities, skip them
+        if(players[currentPlayerIndex].cities.isEmpty()) nextTurn()
+
+        doPreTurn()
+    }
+
+    // run the pre-turn sequence for the player (harvesting, eating)
+    private fun doPreTurn() {
+        players[currentPlayerIndex].doHarvest(map)
+        players[currentPlayerIndex].doEat()
+    }
+
+    // start match
+    fun start() {
+        started = true
+        doPreTurn()
     }
 }

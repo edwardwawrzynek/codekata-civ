@@ -13,13 +13,15 @@ import kotlin.random.Random
 @RequestMapping(value=["/api"])
 class GameController {
 
-    private val game = Game(GameMap.generateRandom(32), KeyManager(listOf("secret0", "secret1", "secret2", "secret3"), listOf("observe0"), listOf("admin0")), true)
+    private val game = Game(GameMap.generateRandom(32), KeyManager(listOf("secret0", "secret1", "secret2", "secret3"), listOf("observe0"), listOf("admin0")))
     init {
         game.players[0].workers.add(Worker(Pair(1,1)))
         game.players[0].workers.add(Worker(Pair(3,1)))
         game.players[1].workers.add(Worker(Pair(15,14)))
         game.players[2].armies.add(Army(Pair(25, 25)))
         game.players[3].cities.add(City(Pair(24, 24)))
+
+        game.start()
     }
 
     private fun makeErrorResponse(msg: String): String = "{\"error\": \"$msg\" }"
@@ -154,7 +156,7 @@ class GameController {
     }
 
     /* end current turn */
-    @RequestMapping(value=["/end_trun"], method=[RequestMethod.POST], produces=["application/json"])
+    @RequestMapping(value=["/end_turn"], method=[RequestMethod.POST], produces=["application/json"])
     @Synchronized
     fun endTurn(@RequestParam key: String): String {
         if(!game.started) return makeErrorResponse("no active game")
@@ -163,6 +165,53 @@ class GameController {
         // make sure key is current player
         if(game.players.indexOf(game.keysToPlayers[key]) != game.currentPlayerIndex) return makeErrorResponse("not current player")
         game.nextTurn()
+
+        return "{\"error\": null}"
+    }
+
+    /* produce a unit */
+    @RequestMapping(value=["/produce"], method=[RequestMethod.POST], produces=["application/json"])
+    @Synchronized
+    fun produce(@RequestParam key: String, type: Int, x: Int, y: Int): String {
+        if(!game.started) return makeErrorResponse("no active game")
+        if(!game.keys.isPlayer(key)) return makeErrorResponse("not a player key")
+
+        val player = game.keysToPlayers[key]!!
+
+        val cost = when(type) {
+            0 -> ARMY_COST
+            1 -> WORKER_COST
+            2 -> CITY_COST
+            else -> return makeErrorResponse("invalid production type")
+        }
+        if(player.resources[ResourceType.Production]!! < cost) {
+            return makeErrorResponse("player doesn't have enough production")
+        }
+
+        if(type == 0 || type == 1) {
+            /* position must be on a city */
+            var isOnCity = false
+            for(c in player.cities) {
+                if(c.position.first == x && c.position.second == y) isOnCity = true
+            }
+            if(!isOnCity) return makeErrorResponse("worker or army must be created on a city")
+        } else if(type == 2) {
+            val fog = getFogMap(key)
+            if(!fog[x][y]) return makeErrorResponse("city cannot be placed on a tile covered by fog of war")
+            for(p in game.players) {
+                if(p == player) continue
+                for(c in p.cities) {
+                    if(c.position.first == x && c.position.second == y) return makeErrorResponse("cannot place city on opponent's city")
+                }
+            }
+        }
+
+        player.resources[ResourceType.Production] = player.resources[ResourceType.Production]!! - cost
+        when(type) {
+            0 -> player.armies.add(Army(Pair(x, y)))
+            1 -> player.workers.add(Worker(Pair(x, y)))
+            2 -> player.cities.add(City(Pair(x, y)))
+        }
 
         return "{\"error\": null}"
     }

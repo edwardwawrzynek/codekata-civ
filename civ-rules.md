@@ -30,10 +30,11 @@ Ocean|1|0|2
 Grassland|2|1|0
 Hills|1|2|1
 Forest|1|3|0
+Mountains|0|1|0
 
 A worker that shares a tile with a city harvests 2 trade.
 
-Each worker and army eats 1 food (in a random order). If a army or worker doesn't eat (no food left), it dies.
+Each worker and army eats 2 food. If a army or worker doesn't eat (no food left), it dies. Armies will starve before workers.
 
 ### Production
 A player spends its harvested production. 
@@ -80,7 +81,7 @@ If all defending armies are killed, the attacking units move into that tile.
 If an army successfully moves into an opponent's city, they gain ownership of it and any of the opponent's workers and armies within manhattan distance 2.
 
 ### Fog of War
-All tiles are hidden from a player, unless they are within manhattan distance of 2 from a city, worker, or army.
+All tiles are hidden from a player, unless they are within manhattan distance of 3 from a city, worker, or army.
 
 ## Winning
 The game is won once one player is the only one that controls any cities.
