@@ -26,6 +26,8 @@ class Game (val map: GameMap, val keys: KeyManager, var started: Boolean) {
     val keysToPlayers = mutableMapOf<String, Player>()
     val playerNames = mutableListOf<String>()
 
+    var currentPlayerIndex = 0
+
     init {
         for(i in keys.playerKeys.indices) {
             val k = keys.playerKeys[i]
@@ -43,5 +45,10 @@ class Game (val map: GameMap, val keys: KeyManager, var started: Boolean) {
                 else -> throw AssertionError("Only four players are allowed")
             }
         }
+    }
+
+    fun nextTurn() {
+        currentPlayerIndex++
+        currentPlayerIndex %= 4
     }
 }
