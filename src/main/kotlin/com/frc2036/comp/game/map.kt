@@ -44,14 +44,36 @@ data class GameMap(val size: Int, val contents: Array<Array<TileType>>) {
         for(x in 0..y) {
           //val tile = listOf(TileType.Ocean, TileType.Grassland, TileType.Hills, TileType.Forest, TileType.Mountains).random()
           val res = noise.GetNoise((x.toFloat()*16.0).toFloat(), (y.toFloat()*16.0).toFloat())+0.5
-          val tile = when {
-            res < 0.2 -> TileType.Ocean
-            res >= 0.2 && res < 0.4 -> TileType.Grassland
-            res >= 0.4 && res < 0.6 -> TileType.Hills
-            res >= 0.6 && res < 0.8 -> TileType.Forest
-            res >= 0.8 -> TileType.Mountains
+          var tile = when {
+            res < 0.3 -> TileType.Ocean
+            res >= 0.3 && res < 0.6 -> TileType.Grassland
+            res >= 0.6 && res < 0.8 -> TileType.Hills
+            //res >= 0.6 && res < 0.8 -> TileType.Forest
+            res >= 0.9 -> TileType.Mountains
             else -> TileType.Ocean
           }
+
+          // randomly determine if it should be a forest if it is grassland or hill
+          if (tile == TileType.Grassland || tile == TileType.Hills) {
+            // get neighbors
+            val neighbors = mutableListOf<TileType>()
+            for (xShift in -1..1) {
+              val trueX = x + xShift
+              if (trueX < 0 || trueX >= squareSize) continue
+              for (yShift in -1..1) {
+                val trueY = y + yShift
+                if (trueY < 0 || trueY >= squareSize || (xShift == 0 && yShift == 0)) continue
+                neighbors.add(contents[trueX][trueY])
+              }
+            }
+
+            // randomly decide based on neighbors
+            val count = 1 + neighbors.count {it == TileType.Forest}
+            if (Random.nextDouble() < count.toDouble() / 8.0) {
+              tile = TileType.Forest
+            }
+          }
+
           contents[x][y] = tile
           // mirror triangle
           contents[y][x] = contents[x][y]
