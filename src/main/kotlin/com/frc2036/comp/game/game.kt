@@ -2,8 +2,12 @@ package com.frc2036.comp.game
 
 import java.lang.AssertionError
 
+// how many hitpoints an army starts with
 val ARMY_INIT_HITPOINTS = 100
-val WORKER_DISTANCE_TO_CITY = 2
+// what is considered nearby a city (effectively for ownership of workers)
+val CITY_NEARBY_DISTANCE = 2
+// distance from unit or city for fogging
+val FOG_DISTANCE = 2
 
 /**
  * player keys correspond to a player in the game. They give access to game manipulation routes, but limit some observation routes with the fog of war

@@ -1,6 +1,5 @@
 package com.frc2036.comp.game
 
-import kotlin.random.Random
 import kotlin.math.abs
 
 /**
@@ -132,10 +131,10 @@ class Player() {
   fun findUnitsNearCity(city: City): List<BoardUnit> {
     val res = mutableListOf<BoardUnit>()
     for(a in armies) {
-      if(city.distanceTo(a) <= WORKER_DISTANCE_TO_CITY) res.add(a)
+      if(city.distanceTo(a) <= CITY_NEARBY_DISTANCE) res.add(a)
     }
     for(w in workers) {
-      if(city.distanceTo(w) <= WORKER_DISTANCE_TO_CITY) res.add(w)
+      if(city.distanceTo(w) <= CITY_NEARBY_DISTANCE) res.add(w)
     }
 
     return res
@@ -149,21 +148,21 @@ class Player() {
       for(y in 0 until map.size) {
         if(res[x][y]) continue
         for(u in cities) {
-          if(u.distanceTo(Pair(x,y)) <= WORKER_DISTANCE_TO_CITY) {
+          if(u.distanceTo(Pair(x,y)) <= FOG_DISTANCE) {
             res[x][y] = true
             break
           }
         }
         if(res[x][y]) continue
         for(u in armies) {
-          if(u.distanceTo(Pair(x,y)) <= WORKER_DISTANCE_TO_CITY) {
+          if(u.distanceTo(Pair(x,y)) <= FOG_DISTANCE) {
             res[x][y] = true
             break
           }
         }
         if(res[x][y]) continue
         for(u in workers) {
-          if(u.distanceTo(Pair(x,y)) <= WORKER_DISTANCE_TO_CITY) {
+          if(u.distanceTo(Pair(x,y)) <= FOG_DISTANCE) {
             res[x][y] = true
             break
           }

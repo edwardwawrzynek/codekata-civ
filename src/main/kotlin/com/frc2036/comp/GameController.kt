@@ -14,6 +14,13 @@ import kotlin.random.Random
 class GameController {
 
     private val game = Game(GameMap.generateRandom(32), KeyManager(listOf("secret0", "secret1", "secret2", "secret3"), listOf("observe0"), listOf("admin0")), true)
+    init {
+        game.players[0].workers.add(Worker(Pair(1,1)))
+        game.players[0].workers.add(Worker(Pair(3,1)))
+        game.players[1].workers.add(Worker(Pair(15,14)))
+        game.players[2].armies.add(Army(Pair(25, 25)))
+        game.players[3].cities.add(City(Pair(24, 24)))
+    }
 
     private fun makeErrorResponse(msg: String): String = "{\"error\": \"$msg\" }"
 
@@ -32,6 +39,9 @@ class GameController {
         }}}"
     }
 
+    // get the fog map for the key (if non player, a blank key)
+    fun getFogMap(key: String) = if(game.keys.isPlayer(key)) game.keysToPlayers[key]!!.calculateUnfoggedMap(game.map) else game.map.observeFogMap()
+
     /* get the current cities. If player, fogged results will not be included */
     @RequestMapping(value=["/cities"], method=[RequestMethod.GET], produces=["application/json"])
     @Synchronized
@@ -40,7 +50,7 @@ class GameController {
         if(!game.keys.isValidKey(key)) return makeErrorResponse("invalid key")
 
         // apply fog of war
-        val fogMap = if(game.keys.isPlayer(key)) game.keysToPlayers[key]!!.calculateUnfoggedMap(game.map) else game.map.observeFogMap()
+        val fogMap = getFogMap(key)
         // calculate visible cities
         val cities = game.players.map { player ->
             player.cities.filter { city -> fogMap[city.position.first][city.position.second] }.map {
@@ -49,6 +59,55 @@ class GameController {
         }
 
         return "{\"error\": null, \"cities\": $cities}"
+    }
+
+    /* get the current armies. if using a player key, some entries may be fogged */
+    @RequestMapping(value=["/armies"], method=[RequestMethod.GET], produces=["application/json"])
+    @Synchronized
+    fun getArmies(@RequestParam key: String): String {
+        if(!game.started) return makeErrorResponse("no active game")
+        if(!game.keys.isValidKey(key)) return makeErrorResponse("invalid key")
+
+        // apply fog of war
+        val fogMap = getFogMap(key)
+        // calculate visible armies
+        val armies = game.players.map { player ->
+            player.armies.filter { army -> fogMap[army.position.first][army.position.second] }.map {
+                army -> "{\"x\": ${army.position.first}, \"y\": ${army.position.second}, \"hitpoints\":${army.hitpoints}}"
+            }
+        }
+
+        return "{\"error\": null, \"armies\": $armies}"
+    }
+
+    /* get the current workers, if using a player key, some entries may be fogged */
+    @RequestMapping(value=["/workers"], method=[RequestMethod.GET], produces=["application/json"])
+    @Synchronized
+    fun getWorkers(@RequestParam key: String): String {
+        if(!game.started) return makeErrorResponse("no active game")
+        if(!game.keys.isValidKey(key)) return makeErrorResponse("invalid key")
+
+        // apply fog of war
+        val fogMap = getFogMap(key)
+        // calculate visible armies
+        val workers = game.players.map { player ->
+            player.workers.filter { worker -> fogMap[worker.position.first][worker.position.second] }.map {
+                worker -> "{\"x\": ${worker.position.first}, \"y\": ${worker.position.second}}"
+            }
+        }
+
+        return "{\"error\": null, \"workers\": $workers}"
+    }
+
+    // get which player index maps to the key
+    @RequestMapping(value=["/player_index"], method=[RequestMethod.GET], produces=["application/json"])
+    @Synchronized
+    fun getPlayerIndex(@RequestParam key: String): String {
+        if(!game.keys.isValidKey(key)) return makeErrorResponse("invalid key")
+        if(!game.keys.isPlayer(key)) return makeErrorResponse("key is not a player key")
+        val player = game.players.indexOf(game.keysToPlayers[key])
+
+        return "{\"error\": null, \"player\": $player}"
     }
 
 }
