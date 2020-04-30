@@ -15,10 +15,6 @@ class GameController {
 
     private val game = Game(GameMap.generateRandom(32), KeyManager(listOf("secret0", "secret1", "secret2", "secret3"), listOf("observe0"), listOf("admin0")))
     init {
-
-        game.players[1].armies.add(Army(Pair(1,0)))
-        game.players[0].workers.add(Worker(Pair(0,1)))
-
         game.start()
     }
 
@@ -312,6 +308,6 @@ class GameController {
     fun getInfo(@RequestParam key: String): String {
         if(!game.keys.isValidKey(key)) return makeErrorResponse("not a valid key")
 
-        return "{\"version\": \"0.1.0\", \"observeRefreshRate\": 500, \"playerRefreshRate\": 500}"
+        return "{\"error\": null, \"version\": \"0.1.1\", \"observeRefreshRate\": 500, \"playerRefreshRate\": 500}"
     }
 }

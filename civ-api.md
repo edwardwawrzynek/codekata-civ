@@ -128,10 +128,10 @@ Response is of the form:
 ```
 {"error": null,
  "players": [
-   {"name": String, "offense": Int, "defense": Int},  // player 0
-   {"name": String, "offense": Int, "defense": Int},  // player 1
-   {"name": String, "offense": Int, "defense": Int},  // player 2
-   {"name": String, "offense": Int, "defense": Int}   // player 3
+   {"name": String, "offense": Double, "defense": Double},  // player 0
+   {"name": String, "offense": Double, "defense": Double},  // player 1
+   {"name": String, "offense": Double, "defense": Double},  // player 2
+   {"name": String, "offense": Double, "defense": Double}   // player 3
  ]}
 ```
 
@@ -212,7 +212,8 @@ End your turn. This must be called, or all the other players will be waiting for
 
 Return information about the server:
 ```
-{"version": "0.1.0", // or whatever
+{"error": null,
+ "version": "0.1.0", // or whatever
  "observeRefreshRate": 500, // or whatever. reccommened time in ms to wait before an observer should update their state
  "playerRefreshRate": 500 // or whatever. reccommened time in ms for a player to wait between current player queries
 }
