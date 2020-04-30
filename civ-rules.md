@@ -1,5 +1,15 @@
 # Rules
 
+The game is played by four players as they compete to expand their civilizations and conquer others.
+
+The game is played on a board with tiles representing different terrains types. Each tile offers different amounts of resources when harvested (food, production, and trade).
+
+Players start with one city in a corner. Their city harvests the tile they are on. Once they've harvested enough production, they can create workers, armies, and more cities. Workers and armies can move, while cities are fixed. Workers move around and harvest the tile they are on. Armies can be moved, and can be used to attack enemy workers, armies, and cities.
+
+Production is required to create armies and workers, and Food is required to keep them alive. Trade can be used to fund research that increases offensive and defensive strengths.
+
+During the game, parts of the game are obscured by a fog of war (any area not within manhattan distance 3 of an army, worker, or city is hidden). 
+
 ## Board
 The game map is a square board of dimensions N x N. Each tile on the board can be one of five types:
 * Ocean
@@ -21,7 +31,7 @@ Each player has an offensive and defensive combat strength (initially 1).
 Players take turns in a linear fashion. Each turn consists of:
 
 ### Harvesting (no player interaction)
-The tiles that cities are on are harvested. Any tile with a worker on it that is within manhattan distance 2 of a city is harvested.
+Cities harvest the tile they are on every turn. Workers harvest the tile they are on, provided they are within manhattan distance 2 of a city. Each turn, a tile can only be harvested once.
 
 Each tile yields:
 Terrain|Food|Production|Trade
@@ -41,9 +51,9 @@ At the end of the turn, 1/4 of any left over food is removed (as if by going bad
 ### Production
 A player spends its harvested production. 
 
-An army cost 10 production. 
-A worker costs 10 production.
-A city costs 30 production.
+An army cost 8 production. 
+A worker costs 8 production.
+A city costs 24 production.
 
 Armies and workers must be placed on a city controlled by the player. Each army starts with 100 hitpoints.
 
@@ -52,9 +62,9 @@ A city may be placed on any tile not covered by the fog of war (below).
 ### Technology
 A player spends its harvested trade.
 
-Defensive research (20 trade) -- increases defensive combat strength by 0.3;
+Defensive research (20 trade) -- increases defensive combat strength by 0.1
 
-Offensive research (20 trade) -- increases offensive combat strength by 0.3;
+Offensive research (20 trade) -- increases offensive combat strength by 0.1
 
 ### Movement
 A player may choose to move all workers and armies north, south, east, or west or not at all.
@@ -100,9 +110,7 @@ For example, if both players have offensive and defensive strengths on 1, and if
 If an army successfully moves into an opponent's city, they gain ownership of it and any of the opponent's workers and armies within manhattan distance 2.
 
 ### Fog of War
-All tiles are hidden from a player, unless they are within manhattan distance of 3 from a city, worker, or army.
+All tiles are hidden from a player, unless they are within manhattan distance of 3 from that player's city, worker, or army.
 
 ## Winning
 The game is won once one player is the only one that controls any cities.
-
-TODO: after number of turns, score cities, workers, and armies

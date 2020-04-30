@@ -15,20 +15,9 @@ class GameController {
 
     private val game = Game(GameMap.generateRandom(32), KeyManager(listOf("secret0", "secret1", "secret2", "secret3"), listOf("observe0"), listOf("admin0")))
     init {
-        game.players[0].workers.add(Worker(Pair(1,1)))
-        game.players[0].workers.add(Worker(Pair(3,1)))
-        game.players[0].workers.add(Worker(Pair(10,1)))
-        game.players[0].workers.add(Worker(Pair(30,1)))
-        game.players[1].workers.add(Worker(Pair(1,10)))
-        game.players[1].workers.add(Worker(Pair(3,10)))
-        game.players[1].workers.add(Worker(Pair(10,10)))
-        game.players[1].workers.add(Worker(Pair(30,10)))
-        game.players[2].armies.add(Army(Pair(25, 25)))
-        game.players[3].cities.add(City(Pair(24, 24)))
 
-        game.players[0].armies.add(Army(Pair(1, 0)))
-        game.players[1].armies.add(Army(Pair(2, 0)))
-        game.players[1].armies.add(Army(Pair(2, 0)))
+        game.players[1].armies.add(Army(Pair(1,0)))
+        game.players[0].workers.add(Worker(Pair(0,1)))
 
         game.start()
     }

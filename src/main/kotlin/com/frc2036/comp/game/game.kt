@@ -15,14 +15,14 @@ const val WORKER_FOOD = 1
 const val ARMY_FOOD = 1
 
 // production cost of army, worker, city
-const val WORKER_COST = 10
-const val ARMY_COST = 10
-const val CITY_COST = 30
+const val WORKER_COST = 8
+const val ARMY_COST = 8
+const val CITY_COST = 24
 
 // trade cost of technology (offesive or defensive strength improvements)
 const val TECHNOLOGY_COST = 20
 // how much technology increases offensive or defensive strength
-const val TECHNOLOGY_IMPROVEMENT = 0.3
+const val TECHNOLOGY_IMPROVEMENT = 0.1
 
 /**
  * player keys correspond to a player in the game. They give access to game manipulation routes, but limit some observation routes with the fog of war
@@ -109,12 +109,34 @@ class Game (val map: GameMap, val keys: KeyManager) {
         }
         // if no defenders, move army into target
         if(defendingPlayer == null) {
+            // check for a city
+            for(p in players) {
+                if(p == currentPlayer) continue
+                for(c in p.cities) {
+                    if (c.position == defendPosition) defendingPlayer = p
+                }
+            }
+            if(defendingPlayer != null) doTakeCity(currentPlayer, defendingPlayer, defendPosition)
             attackUnit.doMove(defendPosition)
             return
         }
         // terrain multipliers
-        val attackTerrain = map.getCombatMultiplier(attackUnit.position)
-        val defendTerrain = map.getCombatMultiplier(defendPosition)
+        var attackTerrain = map.getCombatMultiplier(attackUnit.position)
+        var defendTerrain = map.getCombatMultiplier(defendPosition)
+
+        // add city multipliers
+        for(c in currentPlayer.cities) {
+            if(c.position == attackUnit.position) {
+                attackTerrain *= 1.5
+                break
+            }
+        }
+        for(c in defendingPlayer.cities) {
+            if(c.position == defendPosition) {
+                defendTerrain *= 1.5
+                break
+            }
+        }
 
         // damage dealt by attacker
         val attackDamage = ((currentPlayer.offensiveStrength)/(defendingPlayer.defensiveStrength)) *
@@ -122,7 +144,7 @@ class Game (val map: GameMap, val keys: KeyManager) {
                 (attackTerrain/defendTerrain) *
                 100
 
-        val defendDamage =  ((defendingPlayer.defensiveStrength)/(currentPlayer.offensiveStrength)) *
+        val defendDamage =  ((defendingPlayer.offensiveStrength)/(currentPlayer.defensiveStrength)) *
                 defending.size.toDouble() *
                 (defendTerrain/attackTerrain) *
                 100
@@ -139,9 +161,33 @@ class Game (val map: GameMap, val keys: KeyManager) {
         if(attackUnit.isDead()) {
             currentPlayer.armies.remove(attackUnit)
         } else {
-            /* if some defenders survived, stay in psoition */
+            /* if some defenders survived, stay in position */
             if(anyAlive) attackUnit.moved = true
-            else attackUnit.doMove(defendPosition)
+            else {
+                attackUnit.doMove(defendPosition)
+                // if they took a city, transfer control of armies and workers
+                doTakeCity(currentPlayer, defendingPlayer, defendPosition)
+            }
+        }
+    }
+
+    /* transfer ownership of city and units near it */
+    fun doTakeCity(currentPlayer: Player, defendingPlayer: Player, defendPosition: Pair<Int, Int>) {
+        val isCity = defendingPlayer.cities.any { c -> c.position == defendPosition }
+        if(isCity) {
+            val city = defendingPlayer.cities.findLast { c -> c.position == defendPosition }
+            defendingPlayer.cities.remove(city)
+            currentPlayer.cities.add(city!!)
+            val transfer = defendingPlayer.findUnitsNearCity(city)
+            for(t in transfer) {
+                if(t is Worker) {
+                    defendingPlayer.workers.remove(t)
+                    currentPlayer.workers.add(t)
+                } else if(t is Army) {
+                    defendingPlayer.armies.remove(t)
+                    currentPlayer.armies.add(t)
+                }
+            }
         }
     }
 }
