@@ -7,7 +7,7 @@ let boardDrawn = false;
 
 // display constants
 const TILE_SIZE = 32;
-const SHOWN_TILES = 16;
+let SHOWN_TILES = 24;
 
 class Camera {
     constructor() {
@@ -18,7 +18,9 @@ class Camera {
     }
 
     update(evt) {
-        evt.preventDefault();
+        let yBefore = this.y;
+        let xBefore = this.x;
+
         switch (evt.key) {
             case "ArrowUp":
                 this.y -= this.shift_amount;
@@ -47,15 +49,17 @@ class Camera {
             case "a":
                 this.x -= this.shift_amount;
                 break;
-            default:
-                // do nothing, key didn't matter
+        }
+
+        // stop bad scroll if it had an effect on the game
+        if (yBefore != this.y || xBefore != this.x) {
+            evt.preventDefault();
         }
 
         this.y = Math.max(this.y, 0);
         this.x = Math.max(this.x, 0);
 
         if (this.board_size != undefined) {
-            console.log(this.board_size - SHOWN_TILES)
             this.y = Math.min(this.y, this.board_size - SHOWN_TILES)
             this.x = Math.min(this.x, this.board_size - SHOWN_TILES)
         }
@@ -238,6 +242,16 @@ function updateResources(resources) {
     });
 }
 
+function updateShownTiles() {
+    let inputElement = document.getElementById("map-display-size");
+    let size = parseInt(inputElement.value)
+    if (!isNaN(size)) {
+        if (size > 1 && size <= 32) {
+            SHOWN_TILES = size;
+        }
+    }
+}
+
 async function main() {
     // make an api request
     const board = await JSON.parse(await (await fetch(`/api/board?key=${apiKey}`)).text());
@@ -247,6 +261,9 @@ async function main() {
 
     const players = await JSON.parse(await (await fetch(`/api/players?key=${apiKey}`)).text());
     const resources = await JSON.parse(await (await fetch(`/api/resources?key=${apiKey}`)).text());
+
+    // update shown tiles
+    updateShownTiles()
 
     // update player names, offense, defense, and bg color
     if (players.error == null) {
