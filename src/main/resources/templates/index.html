@@ -8,7 +8,67 @@
     <script type="text/javascript" src="main.js"></script>
 </head>
 <body>
-    <!-- put something here (probably a canvas) -->
-    <canvas id="screen"></canvas>
+    <div id="main-content">
+        <h1>Civilization</h1>
+
+        <span id="player-statuses">
+            <div class="player" id="player-0">
+                <span class="player-name" id="player-0-name">Unnamed 0</span><br>
+                Food: <span id="player-0-food">0</span><br>
+                Production: <span id="player-0-production">0</span><br>
+                Trade: <span id="player-0-trade">0</span><br>
+                Offensive Strength: <span id="player-0-offense">0</span><br>
+                Defensive Strength: <span id="player-0-defense">0</span><br>
+            </div>
+
+            <div class="player" id="player-1">
+                <span class="player-name" id="player-1-name">Unnamed 1</span><br>
+                Food: <span id="player-1-food">0</span><br>
+                Production: <span id="player-1-production">0</span><br>
+                Trade: <span id="player-1-trade">0</span><br>
+                Offensive Strength: <span id="player-1-offense">0</span><br>
+                Defensive Strength: <span id="player-1-defense">0</span><br>
+            </div>
+
+            <div class="player" id="player-2">
+                <span class="player-name" id="player-2-name">Unnamed 2</span><br>
+                Food: <span id="player-2-food">0</span><br>
+                Production: <span id="player-2-production">0</span><br>
+                Trade: <span id="player-2-trade">0</span><br>
+                Offensive Strength: <span id="player-2-offense">0</span><br>
+                Defensive Strength: <span id="player-2-defense">0</span><br>
+            </div>
+
+            <div class="player" id="player-3">
+                <span class="player-name" id="player-3-name">Unnamed 3</span><br>
+                Food: <span id="player-3-food">0</span><br>
+                Production: <span id="player-3-production">0</span><br>
+                Trade: <span id="player-3-trade">0</span><br>
+                Offensive Strength: <span id="player-3-offense">0</span><br>
+                Defensive Strength: <span id="player-3-defense">0</span><br>
+            </div>
+        </span>
+
+        <div id="spectator-options">
+            <h3>Spectate Options</h3>
+
+            <input type="checkbox" id="spectate-0" name="spectate-0">
+            <label id="spectate-0-label" for="spectate-0">Unnamed 0</label>
+
+            <input type="checkbox" id="spectate-1" name="spectate-1">
+            <label id="spectate-1-label" for="spectate-1">Unnamed 1</label>
+
+            <input type="checkbox" id="spectate-2" name="spectate-2">
+            <label id="spectate-2-label" for="spectate-2">Unnamed 2</label>
+
+            <input type="checkbox" id="spectate-3" name="spectate-3">
+            <label id="spectate-3-label" for="spectate-3">Unnamed 3</label>
+
+            <input type="checkbox" id="spectate-full" name="spectate-full" checked="true">
+            <label id="spectate-full-label" for="spectate-full">Full Board</label>
+        </div>
+
+        <canvas id="screen"></canvas>
+    </div>
 </body>
 </html>
