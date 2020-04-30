@@ -57,8 +57,13 @@ body {
     display: inline-block;
 }
 
-#spectate-full-label {
+label {
     color: white;
+    margin-right: 0.8vw;
+}
+
+#map-display-size {
+    width: 4vw;
 }
 
 h1 {
