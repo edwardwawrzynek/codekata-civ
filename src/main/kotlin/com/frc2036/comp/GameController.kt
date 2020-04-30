@@ -15,11 +15,9 @@ class GameController {
 
     private val game = Game(GameMap.generateRandom(32), KeyManager(listOf("secret0", "secret1", "secret2", "secret3"), listOf("observe0"), listOf("admin0")))
     init {
-        game.players[0].workers.add(Worker(Pair(1,1)))
-        game.players[0].workers.add(Worker(Pair(3,1)))
-        game.players[1].workers.add(Worker(Pair(15,14)))
-        game.players[2].armies.add(Army(Pair(25, 25)))
-        game.players[3].cities.add(City(Pair(24, 24)))
+
+        game.players[1].armies.add(Army(Pair(1,0)))
+        game.players[0].workers.add(Worker(Pair(0,1)))
 
         game.start()
     }
@@ -176,6 +174,9 @@ class GameController {
         if(!game.started) return makeErrorResponse("no active game")
         if(!game.keys.isPlayer(key)) return makeErrorResponse("not a player key")
 
+        // make sure key is current player
+        if(game.players.indexOf(game.keysToPlayers[key]) != game.currentPlayerIndex) return makeErrorResponse("not current player")
+
         val player = game.keysToPlayers[key]!!
 
         val cost = when(type) {
@@ -199,9 +200,8 @@ class GameController {
             val fog = getFogMap(key)
             if(!fog[x][y]) return makeErrorResponse("city cannot be placed on a tile covered by fog of war")
             for(p in game.players) {
-                if(p == player) continue
                 for(c in p.cities) {
-                    if(c.position.first == x && c.position.second == y) return makeErrorResponse("cannot place city on opponent's city")
+                    if(c.position.first == x && c.position.second == y) return makeErrorResponse("cannot place city on an existing city")
                 }
             }
         }
@@ -214,5 +214,104 @@ class GameController {
         }
 
         return "{\"error\": null}"
+    }
+
+    @RequestMapping(value=["/technology"], method=[RequestMethod.POST], produces=["application/json"])
+    @Synchronized
+    fun technology(@RequestParam key: String, @RequestParam type: Int): String {
+        if(!game.started) return makeErrorResponse("no active game")
+        if(!game.keys.isPlayer(key)) return makeErrorResponse("not a player key")
+        // make sure key is current player
+        if(game.players.indexOf(game.keysToPlayers[key]) != game.currentPlayerIndex) return makeErrorResponse("not current player")
+
+        if(type != 0 && type != 1) return makeErrorResponse("invalid technology type")
+
+        val player = game.keysToPlayers[key]!!
+        if(player.resources[ResourceType.Trade]!! < TECHNOLOGY_COST) return makeErrorResponse("not enough trade")
+
+        player.resources[ResourceType.Trade] = player.resources[ResourceType.Trade]!! - TECHNOLOGY_COST
+        when(type) {
+            0 -> player.offensiveStrength += TECHNOLOGY_IMPROVEMENT
+            1 -> player.defensiveStrength += TECHNOLOGY_IMPROVEMENT
+        }
+
+        return "{\"error\": null}"
+    }
+
+    @RequestMapping(value=["/move_worker"], method=[RequestMethod.POST], produces=["application/json"])
+    @Synchronized
+    fun moveWorker(@RequestParam key: String, @RequestParam srcX: Int, @RequestParam srcY: Int, @RequestParam dstX: Int, @RequestParam dstY: Int): String {
+        if(!game.started) return makeErrorResponse("no active game")
+        if(!game.keys.isPlayer(key)) return makeErrorResponse("not a player key")
+        // make sure key is current player
+        if(game.players.indexOf(game.keysToPlayers[key]) != game.currentPlayerIndex) return makeErrorResponse("not current player")
+
+        val player = game.keysToPlayers[key]!!
+        // find worker
+        for(w in player.workers) {
+            if(w.position.first == srcX && w.position.second == srcY) {
+                if(!w.isValidMove(Pair(dstX, dstY))) return makeErrorResponse("invalid move (too far)")
+                if(w.moved) return makeErrorResponse("worker already moved this turn")
+
+                // if there are enemy workers on dst, kill them, and then this worker
+                // if there are enemy armies on dst, kill this worker
+                var workerDied = false
+                for(p in game.players) {
+                    if(p == player) continue
+                    val killedWorkers = mutableListOf<Worker>()
+                    for(oW in p.workers) {
+                        if(oW.position.first == dstX && oW.position.second == dstY) {
+                            workerDied = true
+                            killedWorkers.add(oW)
+                        }
+                    }
+                    for(kW in killedWorkers) p.workers.remove(kW)
+                    for(oA in p.armies) {
+                        if(oA.position.first == dstX && oA.position.second == dstY) {
+                            workerDied = true
+                        }
+                    }
+                }
+
+                if(workerDied) player.workers.remove(w)
+                else w.doMove(Pair(dstX, dstY))
+
+                return "{\"error\": null}"
+            }
+        }
+
+        return makeErrorResponse("no worker at specified source location")
+    }
+
+    @RequestMapping(value=["/move_army"], method=[RequestMethod.POST], produces=["application/json"])
+    @Synchronized
+    fun moveArmy(@RequestParam key: String, @RequestParam srcX: Int, @RequestParam srcY: Int, @RequestParam dstX: Int, @RequestParam dstY: Int): String {
+        if(!game.started) return makeErrorResponse("no active game")
+        if(!game.keys.isPlayer(key)) return makeErrorResponse("not a player key")
+        // make sure key is current player
+        if(game.players.indexOf(game.keysToPlayers[key]) != game.currentPlayerIndex) return makeErrorResponse("not current player")
+
+        val player = game.keysToPlayers[key]!!
+        // find worker
+        for(a in player.armies) {
+            if(a.position.first == srcX && a.position.second == srcY) {
+                if(!a.isValidMove(Pair(dstX, dstY))) return makeErrorResponse("invalid move (too far)")
+                if(a.moved) return makeErrorResponse("army already moved this turn")
+
+                game.doCombat(player, a, Pair(dstX, dstY))
+
+                return "{\"error\": null}"
+            }
+        }
+
+        return makeErrorResponse("no army at specified source location")
+    }
+
+    @RequestMapping(value=["/info"], method=[RequestMethod.GET], produces=["application/json"])
+    @Synchronized
+    fun getInfo(@RequestParam key: String): String {
+        if(!game.keys.isValidKey(key)) return makeErrorResponse("not a valid key")
+
+        return "{\"version\": \"0.1.0\", \"observeRefreshRate\": 500, \"playerRefreshRate\": 500}"
     }
 }

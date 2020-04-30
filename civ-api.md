@@ -35,6 +35,10 @@ Each player is given an index -- they are either player 0, 1, 2, or 3
 * `1` - Worker
 * `2` - City
 
+`TechnologyType`
+* `0` - Offensive tech (+0.3 offense strength rating)
+* `1` - Defensive tech (+0.3 defense strength rating)
+
 ## Routes
 ### Game State Routes
 #### `GET /api/board - params(key: String)`
@@ -177,6 +181,10 @@ Otherwise:
 {"error":null}
 ```
 
+#### `POST /api/technology - params(key: String, type: TechnologyType`
+
+Spend harvested trade on technology (offensive or defensive strength rating improvements)
+
 #### `POST /api/move_worker - params(key: String, srcX: Int, srcY: Int, dstX: Int, dstY: Int)`
 
 Move a worker from the (`srcX`,`srcY`) tile to the (`dstX`, `dstY`) tile. The dst tile must be adjacent to the src tile.
@@ -198,3 +206,14 @@ If you move an army to a tile with an opponent on it, combat will occur.
 #### `POST /api/end_turn - params(key: String)`
 
 End your turn. This must be called, or all the other players will be waiting for you.
+
+### Server Information Routes
+#### `GET /api/info - params(key: String)`
+
+Return information about the server:
+```
+{"version": "0.1.0", // or whatever
+ "observeRefreshRate": 500, // or whatever. reccommened time in ms to wait before an observer should update their state
+ "playerRefreshRate": 500 // or whatever. reccommened time in ms for a player to wait between current player queries
+}
+```
