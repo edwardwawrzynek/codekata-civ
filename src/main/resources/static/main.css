@@ -1,11 +1,38 @@
 body {
     padding: 0;
     margin: 0;
+    text-align: center;
+    background-color: #006994;
+}
+
+#main-content {
+    width: 90vw;
+    margin: auto;
+    align-content: center;
+    background-color: black;
+    border: 0.2vw solid white;
+}
+
+.player-name {
+    font-size: 1.5vw;
+    font-weight: bolder;
+    text-align: center;
+}
+
+.player {
+    display: inline-block;
+    margin: 2vw;
+    margin-bottom: 0.5vw;
+    padding: 1vw;
+    border: 0.01vw solid black;
+    background-color: white;
     text-align: left;
 }
 
-.main-content {
-    text-align: left;
+.player:hover {
+    border: 0.2vw solid white;
+    margin: 1.8vw;
+    margin-bottom: 0.3vw;
 }
 
 #screen {
@@ -15,6 +42,26 @@ body {
     width: 100vw;
     height: 100vh;
     border: 2px solid black;
+}
+
+.canvas-container {
+    display: inline-block;
+}
+
+#player-statuses {
+    display: inline-block;
+}
+
+#spectate-full-label {
+    color: white;
+}
+
+h1 {
+    color: orange;
+}
+
+h3 {
+    color: white;
 }
 
 input {

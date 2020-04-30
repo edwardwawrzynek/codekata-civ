@@ -158,12 +158,12 @@ function layFog(units, board, camera) {
     }
 
     const fog = board.map(col => col.map(tile => true)); // fog everything to start
-    for (player=1; player<=4; ++player) {
+    for (player = 0; player < 4; ++player) {
         let spectateID = `spectate-${player}`;
         let inputElement = document.getElementById(spectateID);
         if (inputElement.checked) { // they are spectating this player
             // remove fog
-            let playerUnits = units[player - 1];
+            let playerUnits = units[player];
             playerUnits.forEach((unit) => {
                 for (shiftX = -2; shiftX <= 2; ++shiftX) {
                     let trueX = shiftX + unit.x;
@@ -202,12 +202,61 @@ function layFog(units, board, camera) {
     });
 }
 
+function updatePlayers(players) {
+    players.forEach((player, index) => {
+        // update name
+        let nameElement = document.getElementById(`player-${index}-name`);
+        nameElement.innerHTML = player.name;
+
+        // update offense
+        let offenseElement = document.getElementById(`player-${index}-offense`);
+        offenseElement.innerHTML = player.offense;
+
+        // update defense
+        let defenseElement = document.getElementById(`player-${index}-defense`);
+        defenseElement.innerHTML = player.defense;
+
+        // update background
+        let divElement = document.getElementById(`player-${index}`);
+        let color = getColorFromPlayerIndex(index);
+        divElement.style["background-color"] = color;
+
+        // update name in spectate options
+        let spectateNameElement = document.getElementById(`spectate-${index}-label`);
+        spectateNameElement.innerHTML = player.name;
+        spectateNameElement.style.color = color;
+    });
+}
+
+function updateResources(resources) {
+    const resourceTypes = ["production", "food", "trade"];
+    resources.forEach((playerResources, index) => {
+        resourceTypes.forEach(type => {
+            let spanElement = document.getElementById(`player-${index}-${type}`);
+            spanElement.innerHTML = playerResources[type];
+        });
+    });
+}
+
 async function main() {
     // make an api request
     const board = await JSON.parse(await (await fetch(`/api/board?key=${apiKey}`)).text());
     const cities = await JSON.parse(await (await fetch(`/api/cities?key=${apiKey}`)).text());
     const armies = await JSON.parse(await (await fetch(`/api/armies?key=${apiKey}`)).text());
     const workers = await JSON.parse(await (await fetch(`/api/workers?key=${apiKey}`)).text());
+
+    const players = await JSON.parse(await (await fetch(`/api/players?key=${apiKey}`)).text());
+    const resources = await JSON.parse(await (await fetch(`/api/resources?key=${apiKey}`)).text());
+
+    // update player names, offense, defense, and bg color
+    if (players.error == null) {
+        updatePlayers(players.players);
+    }
+
+    // update resources
+    if (resources.error == null) {
+        updateResources(resources.resources);
+    }
 
     // clear canvas
     canvas.clear();
