@@ -29,6 +29,11 @@ body {
     text-align: left;
 }
 
+.country-flavor {
+    font-size: 0.8vw;
+    color: black;
+}
+
 .player:hover {
     border: 0.2vw solid white;
     margin: 1.8vw;
