@@ -18,7 +18,7 @@ class Camera {
     }
 
     update(evt) {
-        console.log(evt.key);
+        evt.preventDefault();
         switch (evt.key) {
             case "ArrowUp":
                 this.y -= this.shift_amount;
@@ -302,7 +302,7 @@ async function main() {
 
 window.onload = () => {
     // bind controls
-    document.addEventListener("keydown", (evt) => camera.update(evt));
+    document.addEventListener("keydown", (evt) => camera.update(evt), false);
 
     loadTerrainImages();
     canvas = new fabric.Canvas("screen");
