@@ -74,6 +74,9 @@ data class GameMap(val size: Int, val contents: Array<Array<TileType>>) {
             }
           }
 
+          // if this is a corner where a city will start, force it to be a grassland
+          if (x == 0 && y == 0) tile = TileType.Grassland
+
           contents[x][y] = tile
           // mirror triangle
           contents[y][x] = contents[x][y]
