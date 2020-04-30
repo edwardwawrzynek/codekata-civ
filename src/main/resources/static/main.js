@@ -7,7 +7,7 @@ let boardDrawn = false;
 
 // display constants
 const TILE_SIZE = 32;
-let SHOWN_TILES = 24;
+let SHOWN_TILES = 32;
 
 class Camera {
     constructor() {
@@ -169,20 +169,20 @@ function layFog(units, board, camera) {
             // remove fog
             let playerUnits = units[player];
             playerUnits.forEach((unit) => {
-                for (shiftX = -2; shiftX <= 2; ++shiftX) {
-                    let trueX = shiftX + unit.x;
-                    if (trueX < 0 || trueX >= fog.length) {
+                for (xShift = -2; xShift <= 2; xShift++) {
+                    let trueX = unit.x + xShift;
+                    if (trueX < 0 || trueX >= board.length) {
                         continue;
                     }
-                    for (shiftY = -2; shiftY <= 2; ++shiftY) {
-                        let trueY = shiftY + unit.y;
-                        if (trueY < 0 || trueY >= fog[0].length) {
+
+                    for (yShift = -2; yShift <= 2; yShift++) {
+                        let trueY = unit.y + yShift;
+                        if (trueY < 0 || trueY >= board[0].length) {
                             continue;
                         }
-
-                        console.log("remove fog")
-                        // remove fog from here
-                        fog[trueX][trueY] = false;
+                        if (fog[trueX][trueY]) {
+                            fog[trueX][trueY] = Math.abs(trueX - unit.x) + Math.abs(trueY - unit.y) > 2;
+                        }
                     }
                 }
             });
