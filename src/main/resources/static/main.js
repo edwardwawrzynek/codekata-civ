@@ -76,7 +76,7 @@ let terrainImages = [
 ]
 
 function loadTerrainImages() {
-    const sources = ["./ocean.png", "./grassland.png", "./hills.png"];//, "./forest.png", "./mountains.png"]
+    const sources = ["./images/ocean.png", "./images/grassland.png", "./images/hills.png", "./images/forest.png", "./images/mountains.png"];
     sources.forEach((source, index) => {
         terrainImages[index].src = source;
     })
