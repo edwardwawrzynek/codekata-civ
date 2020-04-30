@@ -1,6 +1,11 @@
 body {
     padding: 0;
     margin: 0;
+    text-align: left;
+}
+
+.main-content {
+    text-align: left;
 }
 
 #screen {
@@ -9,4 +14,13 @@ body {
     display: block;
     width: 100vw;
     height: 100vh;
+    border: 2px solid black;
+}
+
+input {
+    display: inline-block;
+}
+
+label {
+    display: inline-block;
 }
