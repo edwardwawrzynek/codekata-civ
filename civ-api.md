@@ -35,6 +35,10 @@ Each player is given an index -- they are either player 0, 1, 2, or 3
 * `1` - Worker
 * `2` - City
 
+`TechnologyType`
+* `0` - Offensive tech (+0.3 offense strength rating)
+* `1` - Defensive tech (+0.3 defense strength rating)
+
 ## Routes
 ### Game State Routes
 #### `GET /api/board - params(key: String)`
@@ -176,6 +180,10 @@ Otherwise:
 ```
 {"error":null}
 ```
+
+#### `POST /api/technology - params(key: String, type: TechnologyType`
+
+Spend harvested trade on technology (offensive or defensive strength rating improvements)
 
 #### `POST /api/move_worker - params(key: String, srcX: Int, srcY: Int, dstX: Int, dstY: Int)`
 

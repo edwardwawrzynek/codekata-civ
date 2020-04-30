@@ -104,9 +104,9 @@ data class GameMap(val size: Int, val contents: Array<Array<TileType>>) {
     return when(type) {
       TileType.Ocean -> mapOf(ResourceType.Food to 1, ResourceType.Production to 0, ResourceType.Trade to 2)
       TileType.Grassland -> mapOf(ResourceType.Food to 2, ResourceType.Production to 1, ResourceType.Trade to 0)
-      TileType.Hills -> mapOf(ResourceType.Food to 1, ResourceType.Production to 2, ResourceType.Trade to 1)
-      TileType.Forest -> mapOf(ResourceType.Food to 1, ResourceType.Production to 3, ResourceType.Trade to 0)
-      TileType.Mountains -> mapOf(ResourceType.Food to 0, ResourceType.Production to 1, ResourceType.Trade to 0)
+      TileType.Hills -> mapOf(ResourceType.Food to 2, ResourceType.Production to 2, ResourceType.Trade to 1)
+      TileType.Forest -> mapOf(ResourceType.Food to 2, ResourceType.Production to 3, ResourceType.Trade to 0)
+      TileType.Mountains -> mapOf(ResourceType.Food to 1, ResourceType.Production to 1, ResourceType.Trade to 0)
       else -> throw AssertionError("map should not contain fogged tiles")
     }
   }
@@ -269,6 +269,13 @@ class Player() {
       }
     }
     if(resources[ResourceType.Food]!! < 0) resources[ResourceType.Food] = 0
+    else resources[ResourceType.Food] = (resources[ResourceType.Food]!! * 3) / 4
+  }
+
+  /* clear moved indicator on armies + workers */
+  fun clearMoved() {
+    for(w in workers) w.moved = false
+    for(a in armies) a.moved = false
   }
 
 }

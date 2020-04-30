@@ -10,14 +10,19 @@ const val CITY_NEARBY_DISTANCE = 2
 const val FOG_DISTANCE = 3
 
 // food each worker eats
-const val WORKER_FOOD = 2
+const val WORKER_FOOD = 1
 // food each army eats
-const val ARMY_FOOD = 2
+const val ARMY_FOOD = 1
 
 // production cost of army, worker, city
 const val WORKER_COST = 10
 const val ARMY_COST = 10
 const val CITY_COST = 30
+
+// trade cost of technology (offesive or defensive strength improvements)
+const val TECHNOLOGY_COST = 20
+// how much technology increases offensive or defensive strength
+const val TECHNOLOGY_IMPROVEMENT = 0.3
 
 /**
  * player keys correspond to a player in the game. They give access to game manipulation routes, but limit some observation routes with the fog of war
@@ -69,6 +74,7 @@ class Game (val map: GameMap, val keys: KeyManager) {
 
     // run the pre-turn sequence for the player (harvesting, eating)
     private fun doPreTurn() {
+        players[currentPlayerIndex].clearMoved()
         players[currentPlayerIndex].doHarvest(map)
         players[currentPlayerIndex].doEat()
     }
