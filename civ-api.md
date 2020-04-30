@@ -206,3 +206,14 @@ If you move an army to a tile with an opponent on it, combat will occur.
 #### `POST /api/end_turn - params(key: String)`
 
 End your turn. This must be called, or all the other players will be waiting for you.
+
+### Server Information Routes
+#### `GET /api/info - params(key: String)`
+
+Return information about the server:
+```
+{"version": "0.1.0", // or whatever
+ "observeRefreshRate": 500, // or whatever. reccommened time in ms to wait before an observer should update their state
+ "playerRefreshRate": 500 // or whatever. reccommened time in ms for a player to wait between current player queries
+}
+```

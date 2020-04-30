@@ -113,6 +113,19 @@ data class GameMap(val size: Int, val contents: Array<Array<TileType>>) {
       else -> throw AssertionError("map should not contain fogged tiles")
     }
   }
+
+  fun getCombatMultiplier(position: Pair<Int, Int>): Double {
+    val type = contents[position.first][position.second]
+
+    return when(type) {
+      TileType.Ocean -> 0.5
+      TileType.Grassland -> 1.0
+      TileType.Hills -> 1.5
+      TileType.Forest -> 1.5
+      TileType.Mountains -> 2.0
+      else -> throw AssertionError("map should not contain fogged tiles")
+    }
+  }
 }
 
 /**

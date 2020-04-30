@@ -66,7 +66,7 @@ An army trying to move onto a tile is an attacking army. All armies on that tile
 If you wish to attack with multiple armies, they must attack individually, one after another.
 
 ### Combat
-Workers are automatically killed if they get involved in combat (attacking or defending).
+Workers are automatically killed if they get involved in combat (attacking or defending) -- don't attack with workers, they will die and deal no damage.
 
 If there are multiple armies defending, they are considered part of the same defending unit.
 

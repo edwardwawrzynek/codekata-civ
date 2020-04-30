@@ -84,4 +84,64 @@ class Game (val map: GameMap, val keys: KeyManager) {
         started = true
         doPreTurn()
     }
+
+    /* do combat
+     attackUnit is the army attacking
+     defendPosition is the square being attacked
+    */
+    fun doCombat(currentPlayer: Player, attackUnit: Army, defendPosition: Pair<Int, Int>) {
+        // kill all workers on defendPosition
+        for(p in players) {
+            if(p == currentPlayer) continue
+            p.workers.removeIf {w -> w.position == defendPosition}
+        }
+        // find defending armies
+        val defending = mutableListOf<Army>()
+        var defendingPlayer: Player? = null
+        for(p in players) {
+            for(a in p.armies) {
+                if(a.position == defendPosition) {
+                    defending.add(a)
+                    if(defendingPlayer != null && defendingPlayer != p) throw AssertionError("Only armies of one player can be in a square")
+                    defendingPlayer = p
+                }
+            }
+        }
+        // if no defenders, move army into target
+        if(defendingPlayer == null) {
+            attackUnit.doMove(defendPosition)
+            return
+        }
+        // terrain multipliers
+        val attackTerrain = map.getCombatMultiplier(attackUnit.position)
+        val defendTerrain = map.getCombatMultiplier(defendPosition)
+
+        // damage dealt by attacker
+        val attackDamage = ((currentPlayer.offensiveStrength)/(defendingPlayer.defensiveStrength)) *
+                (1.0/defending.size.toDouble()) *
+                (attackTerrain/defendTerrain) *
+                100
+
+        val defendDamage =  ((defendingPlayer.defensiveStrength)/(currentPlayer.offensiveStrength)) *
+                defending.size.toDouble() *
+                (defendTerrain/attackTerrain) *
+                100
+
+        attackUnit.takeDamage(defendDamage.toInt())
+
+        var anyAlive = false
+        for(d in defending) {
+            d.takeDamage(attackDamage.toInt())
+            if(d.isDead()) defendingPlayer.armies.remove(d)
+            else anyAlive = true
+        }
+
+        if(attackUnit.isDead()) {
+            currentPlayer.armies.remove(attackUnit)
+        } else {
+            /* if some defenders survived, stay in psoition */
+            if(anyAlive) attackUnit.moved = true
+            else attackUnit.doMove(defendPosition)
+        }
+    }
 }
