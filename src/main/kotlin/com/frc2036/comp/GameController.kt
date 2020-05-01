@@ -18,6 +18,9 @@ class GameController {
         game.start()
     }
 
+    // check if position exists on board
+    private fun checkPosition(position: Pair<Int, Int>): Boolean = position.first >= 0 && position.first < game.map.size && position.second >= 0 && position.second < game.map.size
+
     private fun makeErrorResponse(msg: String): String = "{\"error\": \"$msg\" }"
 
     /* get the current map. If a player, fogged tiles may be present */
@@ -170,6 +173,8 @@ class GameController {
         if(!game.started) return makeErrorResponse("no active game")
         if(!game.keys.isPlayer(key)) return makeErrorResponse("not a player key")
 
+        if(!checkPosition(Pair(x, y))) return makeErrorResponse("position is not on board")
+
         // make sure key is current player
         if(game.players.indexOf(game.keysToPlayers[key]) != game.currentPlayerIndex) return makeErrorResponse("not current player")
 
@@ -242,6 +247,9 @@ class GameController {
         // make sure key is current player
         if(game.players.indexOf(game.keysToPlayers[key]) != game.currentPlayerIndex) return makeErrorResponse("not current player")
 
+        if(!checkPosition(Pair(srcX, srcY))) return makeErrorResponse("src position is not on board")
+        if(!checkPosition(Pair(dstX, dstY))) return makeErrorResponse("dst position is not on board")
+
         val player = game.keysToPlayers[key]!!
         // find worker
         for(w in player.workers) {
@@ -287,6 +295,9 @@ class GameController {
         // make sure key is current player
         if(game.players.indexOf(game.keysToPlayers[key]) != game.currentPlayerIndex) return makeErrorResponse("not current player")
 
+        if(!checkPosition(Pair(srcX, srcY))) return makeErrorResponse("src position is not on board")
+        if(!checkPosition(Pair(dstX, dstY))) return makeErrorResponse("dst position is not on board")
+
         val player = game.keysToPlayers[key]!!
         // find worker
         for(a in player.armies) {
@@ -308,6 +319,6 @@ class GameController {
     fun getInfo(@RequestParam key: String): String {
         if(!game.keys.isValidKey(key)) return makeErrorResponse("not a valid key")
 
-        return "{\"error\": null, \"version\": \"0.1.1\", \"observeRefreshRate\": 500, \"playerRefreshRate\": 500}"
+        return "{\"error\": null, \"version\": \"$VERSION\", \"observeRefreshRate\": 500, \"playerRefreshRate\": 500}"
     }
 }

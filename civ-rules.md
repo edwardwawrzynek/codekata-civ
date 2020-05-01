@@ -11,7 +11,7 @@ Production is required to create armies and workers, and Food is required to kee
 During the game, parts of the game are obscured by a fog of war (any area not within manhattan distance 3 of an army, worker, or city is hidden). 
 
 ## Board
-The game map is a square board of dimensions N x N. Each tile on the board can be one of five types:
+The game map is a square board of dimensions 32 x 32. Each tile on the board can be one of five types:
 * Ocean
 * Grassland
 * Hills
