@@ -172,6 +172,7 @@ function layFog(units, board, camera) {
     }
 
     const fog = board.map(col => col.map(tile => true)); // fog everything to start
+    const fogDensity = 3
     for (player = 0; player < 4; ++player) {
         let spectateID = `spectate-${player}`;
         let inputElement = document.getElementById(spectateID);
@@ -179,19 +180,19 @@ function layFog(units, board, camera) {
             // remove fog
             let playerUnits = units[player];
             playerUnits.forEach((unit) => {
-                for (xShift = -2; xShift <= 2; xShift++) {
+                for (xShift = -fogDensity; xShift <= fogDensity; xShift++) {
                     let trueX = unit.x + xShift;
                     if (trueX < 0 || trueX >= board.length) {
                         continue;
                     }
 
-                    for (yShift = -2; yShift <= 2; yShift++) {
+                    for (yShift = -fogDensity; yShift <= fogDensity; yShift++) {
                         let trueY = unit.y + yShift;
                         if (trueY < 0 || trueY >= board[0].length) {
                             continue;
                         }
                         if (fog[trueX][trueY]) {
-                            fog[trueX][trueY] = Math.abs(trueX - unit.x) + Math.abs(trueY - unit.y) > 2;
+                            fog[trueX][trueY] = Math.abs(trueX - unit.x) + Math.abs(trueY - unit.y) > fogDensity;
                         }
                     }
                 }
