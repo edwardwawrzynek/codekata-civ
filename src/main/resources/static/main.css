@@ -11,6 +11,7 @@ body {
     align-content: center;
     background-color: black;
     border: 0.2vw solid white;
+    padding: 3vw;
 }
 
 .player-name {
@@ -67,6 +68,7 @@ label {
 }
 
 h1 {
+    font-size: 6vw;
     color: orange;
 }
 
