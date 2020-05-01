@@ -131,11 +131,16 @@ function drawBoard(board, camera) {
     })
 }
 
-function drawUnits(units, label) {
+function drawUnits(units, label, countStrength=false) {
     // TODO: make graphics a list of images, not strings
     units.forEach((playerUnits, index) => {
         let color = getColorFromPlayerIndex(index);
+        let totalStrength = 0;
         playerUnits.forEach(unit => {
+            if (countStrength) {
+                totalStrength += unit.hitpoints;
+            }
+
             let rect = new fabric.Rect({
                 left: (unit.x - camera.x) * TILE_SIZE,
                 top: (unit.y - camera.y) * TILE_SIZE,
@@ -146,7 +151,12 @@ function drawUnits(units, label) {
                 ry: TILE_SIZE / 2
             });
 
-            let text = fabricText(label, rect)
+            if (countStrength) {
+                var text = fabricText(toString(totalStrength), rect);
+            }
+            else {
+                var text = fabricText(label, rect)
+            } 
 
             canvas.add(rect);
             canvas.add(text);
@@ -253,7 +263,7 @@ function updateShownTiles() {
 }
 
 async function main() {
-    // make an api request
+    // make api requests
     const board = await JSON.parse(await (await fetch(`/api/board?key=${apiKey}`)).text());
     const cities = await JSON.parse(await (await fetch(`/api/cities?key=${apiKey}`)).text());
     const armies = await JSON.parse(await (await fetch(`/api/armies?key=${apiKey}`)).text());
@@ -263,7 +273,7 @@ async function main() {
     const resources = await JSON.parse(await (await fetch(`/api/resources?key=${apiKey}`)).text());
 
     // update shown tiles
-    updateShownTiles()
+    updateShownTiles();
 
     // update player names, offense, defense, and bg color
     if (players.error == null) {
@@ -283,7 +293,7 @@ async function main() {
         canvas.setWidth(SHOWN_TILES * TILE_SIZE);
         canvas.setHeight(SHOWN_TILES * TILE_SIZE);
 
-        camera.board_size = board.board.length
+        camera.board_size = board.board.length;
         drawBoard(board.board, camera);
     }
     
@@ -291,7 +301,7 @@ async function main() {
 
     // draw armies
     if (armies.error == null) {
-        drawUnits(armies.armies, "A");
+        drawUnits(armies.armies, "A", true);
         units.forEach((array, player) => {
             units[player] = array.concat(armies.armies[player]);
         })
@@ -323,5 +333,5 @@ window.onload = () => {
 
     loadTerrainImages();
     canvas = new fabric.Canvas("screen");
-    window.setInterval(main, 500)
+    window.setInterval(main, 500);
 }
