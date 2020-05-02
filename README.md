@@ -22,7 +22,7 @@ An api should:
 3. Call `/api/player_index` to get their player index (must calls return information with entries for each player index. You want to know which information is yours and which is your enemies)
 4. Call `/api/info` and note the `playerRefreshRate` field. This is the time you should give between `/api/current_player` queries. This isn't technically required, but please do this. This allows the server to balance request volumes.
 5. Query `/api/current_player` until it signals it is your turn. You should do this at the frequency obtained in step 4.
-6. Reload the game state (`/api/cities`, `/api/armies`, `/api/workers`, `/api/resources`, `/api/players`, `/api/board`). You can cache `/api/board`, as it doesn't change. The rest should always be reloaded.
+6. Reload the game state (`/api/cities`, `/api/armies`, `/api/workers`, `/api/resources`, `/api/players`, `/api/board`). All of these, even the board, should always be reloaded (fog of war may have changed).
 7. Make your move via a combination of `/api/produce`, `/api/technology`, `/api/move_worker`, and `/api/move_army`
 8. Tell the server your turn is doen by calling `/api/end_turn`
 9. Goto step 5
