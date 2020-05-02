@@ -2,7 +2,7 @@ package com.frc2036.comp.game
 
 import java.lang.AssertionError
 
-const val VERSION = "0.1.2"
+const val VERSION = "0.1.3"
 
 // how many hitpoints an army starts with
 const val ARMY_INIT_HITPOINTS = 100
