@@ -9,6 +9,7 @@ let boardDrawn = false;
 const TILE_SIZE = 32;
 let SHOWN_TILES = 32;
 
+
 class Camera {
     constructor() {
         this.x = 0
@@ -66,6 +67,96 @@ class Camera {
     }
 }
 const camera = new Camera();
+
+class Inspector {
+    constructor() {
+        this.inspectX = -1;
+        this.inspectY = -1;
+
+        this.units = {
+            armies: [],
+            workers: [],
+            cities: []
+        }
+        this.popupOn = false;
+        this.popupRect = null;
+        this.popupText = null;
+
+        // display styles
+        this.popupWidth = 5; // tiles
+        this.popupHeight = 3; // tiles
+        this.pixelDisplacement = 4; // pixels
+    }
+
+    update() {
+        // draw the popup or don't
+        if (this.popupOn) {
+            this.mouseDown({pointer: {x: this.inspectX, y: this.inspectY}});
+        }
+    }
+
+    mouseDown(evt) {
+        this.inspectX = evt.pointer.x;
+        this.inspectY = evt.pointer.y;
+
+        // create popup
+        let tileX = Math.floor(evt.pointer.x / TILE_SIZE);
+        let tileY = Math.floor(evt.pointer.y / TILE_SIZE);
+
+        let workers = 0
+        let cities = 0
+        let armies = 0
+        // inspect the tile
+        this.units.armies.forEach((army) => {
+            if (army.x == tileX && army.y == tileY) {
+                armies += 1
+            }
+        });
+        this.units.workers.forEach((worker) => {
+            if (worker.x == tileX && worker.y == tileY) {
+                workers += 1
+            }
+        });
+        this.units.cities.forEach((city) => {
+            if (city.x == tileX && city.y == tileY) {
+                cities += 1
+            }
+        });
+
+        console.log(this.units);
+
+        let shiftX = 0;
+        if (tileX + this.popupWidth > 16) {
+            shiftX = -this.popupWidth * TILE_SIZE - TILE_SIZE - 2 * this.pixelDisplacement;
+        }
+        let shiftY = 0;
+        if (tileY + this.popupHeight > 16) {
+            shiftY = -this.popupHeight * TILE_SIZE - TILE_SIZE - 2 * this.pixelDisplacement;
+        }
+        let popupLeft = tileX * TILE_SIZE + TILE_SIZE + this.pixelDisplacement + shiftX;
+        let popupTop = tileY * TILE_SIZE + TILE_SIZE + this.pixelDisplacement + shiftY;
+
+        this.popupRect = new fabric.Rect({
+            left: popupLeft,
+            top: popupTop,
+            fill: "white",
+            width: this.popupWidth * TILE_SIZE,
+            height: this.popupHeight * TILE_SIZE
+        });
+        this.popupText = fabricText(`Cities: ${cities}\nArmies: ${armies}\nWorkers: ${workers}`, this.popupRect);
+        this.popupOn = true;
+        canvas.add(this.popupRect);
+        canvas.add(this.popupText);
+    }
+
+    mouseUp(evt) {
+        // destroy popup
+        this.popupOn = false;
+        this.popupRect = null;
+        this.popupText = null;
+    }
+}
+const inspector = new Inspector();
 
 let terrainImages = [
     new Image(TILE_SIZE, TILE_SIZE), // ocean
@@ -131,16 +222,11 @@ function drawBoard(board, camera) {
     })
 }
 
-function drawUnits(units, label, countStrength=false) {
+function drawUnits(units, label) {
     // TODO: make graphics a list of images, not strings
     units.forEach((playerUnits, index) => {
         let color = getColorFromPlayerIndex(index);
-        let totalStrength = 0;
         playerUnits.forEach(unit => {
-            if (countStrength) {
-                totalStrength += unit.hitpoints;
-            }
-
             let rect = new fabric.Rect({
                 left: (unit.x - camera.x) * TILE_SIZE,
                 top: (unit.y - camera.y) * TILE_SIZE,
@@ -151,13 +237,8 @@ function drawUnits(units, label, countStrength=false) {
                 ry: TILE_SIZE / 2
             });
 
-            if (countStrength) {
-                var text = fabricText(toString(totalStrength), rect);
-            }
-            else {
-                var text = fabricText(label, rect)
-            } 
-
+            var text = fabricText(label, rect)
+        
             canvas.add(rect);
             canvas.add(text);
         })
@@ -305,7 +386,8 @@ async function main() {
         drawUnits(armies.armies, "A", true);
         units.forEach((array, player) => {
             units[player] = array.concat(armies.armies[player]);
-        })
+        });
+        inspector.units.armies = [].concat.apply([], armies.armies);
     }
 
     // draw workers
@@ -313,7 +395,8 @@ async function main() {
         drawUnits(workers.workers, "W");
         units.forEach((array, player) => {
             units[player] = array.concat(workers.workers[player]);
-        })
+        });
+        inspector.units.workers = [].concat.apply([], workers.workers);
     }
 
     // draw cities (notice this is last so that cities are on top)
@@ -321,11 +404,15 @@ async function main() {
         drawUnits(cities.cities, "C");
         units.forEach((array, player) => {
             units[player] = array.concat(cities.cities[player]);
-        })
+        });
+        inspector.units.cities = [].concat.apply([], cities.cities);
     }
 
     // lay the fog
     layFog(units, board.board, camera);
+
+    // update inspector
+    inspector.update();
 }
 
 window.onload = () => {
@@ -334,5 +421,8 @@ window.onload = () => {
 
     loadTerrainImages();
     canvas = new fabric.Canvas("screen");
-    window.setInterval(main, 500);
+    canvas.on("mouse:down", (evt) => inspector.mouseDown(evt));
+    canvas.on("mouse:up", (evt) => inspector.mouseUp(evt));
+
+    window.setInterval(main, 1000);
 }
