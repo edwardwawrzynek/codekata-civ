@@ -22,7 +22,7 @@ body {
 
 .player {
     display: inline-block;
-    margin: 2vw;
+    margin: 1.5vw;
     margin-bottom: 0.5vw;
     padding: 1vw;
     border: 0.01vw solid black;
