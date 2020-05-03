@@ -306,11 +306,11 @@ function updatePlayers(players) {
 
         // update offense
         let offenseElement = document.getElementById(`player-${index}-offense`);
-        offenseElement.innerHTML = player.offense;
+        offenseElement.innerHTML = player.offense.toFixed(1);
 
         // update defense
         let defenseElement = document.getElementById(`player-${index}-defense`);
-        defenseElement.innerHTML = player.defense;
+        defenseElement.innerHTML = player.defense.toFixed(1);
 
         // update background
         let divElement = document.getElementById(`player-${index}`);

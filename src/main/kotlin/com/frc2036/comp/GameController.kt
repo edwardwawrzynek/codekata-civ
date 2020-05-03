@@ -13,9 +13,11 @@ import kotlin.random.Random
 @RequestMapping(value=["/api"])
 class GameController {
 
-    private val game = Game(GameMap.generateRandom(32), KeyManager(listOf("secret0", "secret1", "secret2", "secret3"), listOf("observe0"), listOf("admin0")))
+    private var game = Game(GameMap.generateRandom(32), KeyManager(listOf(System.getenv()["CIV_PLAYER0_KEY"] ?: "secret0", System.getenv()["CIV_PLAYER1_KEY"] ?: "secret1", System.getenv()["CIV_PLAYER2_KEY"] ?: "secret2", System.getenv()["CIV_PLAYER3_KEY"] ?: "secret3"), listOf(System.getenv()["CIV_OBSERVE_KEY"] ?: "observe0"), listOf(System.getenv()["CIV_ADMIN_KEY"] ?: "admin0")))
     init {
-        game.start()
+        if(System.getenv()["CIV_ENABLE_ADMIN_CONTROL"] == null) {
+            game.start()
+        }
     }
 
     // check if position exists on board
@@ -321,4 +323,25 @@ class GameController {
 
         return "{\"error\": null, \"version\": \"$VERSION\", \"observeRefreshRate\": 500, \"playerRefreshRate\": 500}"
     }
+
+    @RequestMapping(value=["/admin/stop"], method=[RequestMethod.POST], produces=["application/json"])
+    @Synchronized
+    fun stopGame(@RequestParam key: String): String {
+        if(!game.keys.isAdmin(key)) return makeErrorResponse("not admin key")
+
+        game.started = false
+
+        return "{\"error\": null}"
+    }
+
+    @RequestMapping(value=["/admin/start"], method=[RequestMethod.POST], produces=["application/json"])
+    @Synchronized
+    fun startGame(@RequestParam key: String): String {
+        if(!game.keys.isAdmin(key)) return makeErrorResponse("not admin key")
+
+        game.start()
+
+        return "{\"error\": null}"
+    }
+
 }
