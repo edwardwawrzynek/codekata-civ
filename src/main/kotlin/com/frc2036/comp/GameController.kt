@@ -213,7 +213,28 @@ class GameController {
         when(type) {
             0 -> player.armies.add(Army(Pair(x, y)))
             1 -> player.workers.add(Worker(Pair(x, y)))
-            2 -> player.cities.add(City(Pair(x, y)))
+            2 -> {
+                val city = City(Pair(x, y))
+                player.cities.add(city)
+                // if placed on enemy worker or army, transfer ownership
+                for(p in game.players) {
+                    if(p == player) continue
+                    for(w in p.workers) {
+                        if(w.position == city.position) {
+                            player.cities.remove(city)
+                            p.cities.add(city)
+                        }
+                        return "{\"error\": null}"
+                    }
+                    for(a in p.armies) {
+                        if(a.position == city.position) {
+                            player.cities.remove(city)
+                            p.cities.add(city)
+                        }
+                        return "{\"error\": null}"
+                    }
+                }
+            }
         }
 
         return "{\"error\": null}"
