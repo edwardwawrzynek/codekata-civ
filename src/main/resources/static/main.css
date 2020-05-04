@@ -76,6 +76,10 @@ h3 {
     color: white;
 }
 
+h4 {
+    color: white
+}
+
 input {
     display: inline-block;
 }
