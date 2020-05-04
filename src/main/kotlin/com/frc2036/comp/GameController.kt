@@ -29,7 +29,7 @@ class GameController {
     @RequestMapping(value=["/board"], method=[RequestMethod.GET], produces=["application/json"])
     @Synchronized
     fun getBoard(@RequestParam key: String): String {
-        if(!game.started) return makeErrorResponse("no active game")
+        //if(!game.started) return makeErrorResponse("no active game")
         if(!game.keys.isValidKey(key)) return makeErrorResponse("invalid key")
         // apply fog of war
         val fogMap = if(game.keys.isPlayer(key)) game.keysToPlayers[key]!!.calculateUnfoggedMap(game.map) else game.map.observeFogMap()
@@ -340,6 +340,21 @@ class GameController {
         if(!game.keys.isAdmin(key)) return makeErrorResponse("not admin key")
 
         game.start()
+
+        return "{\"error\": null}"
+    }
+
+    @RequestMapping(value=["/admin/new_map"], method=[RequestMethod.POST], produces=["application/json"])
+    @Synchronized
+    fun newBoard(@RequestParam key: String): String {
+        if(!game.keys.isAdmin(key)) return makeErrorResponse("not admin key")
+
+        val newMap = GameMap.generateRandom(32)
+        for(x in 0 until 32) {
+            for(y in 0 until 32) {
+                game.map.contents[x][y] = newMap.contents[x][y]
+            }
+        }
 
         return "{\"error\": null}"
     }
