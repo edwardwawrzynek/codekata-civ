@@ -57,7 +57,7 @@ A city costs 24 production.
 
 Armies and workers must be placed on a city controlled by the player. Each army starts with 100 hitpoints.
 
-A city may be placed on any tile not covered by the fog of war (below).
+A city may be placed on any tile not covered by the fog of war (below). A city may not be placed on another city. If a city is placed on an opponent's worker or army, it becomes theirs.
 
 ### Technology
 A player spends its harvested trade.
